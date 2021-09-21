@@ -1,15 +1,19 @@
 #include <zmq.hpp>
 #include <Windows.h>
-
 #include "SMStructs.h"
 #include "SMFcn.h"
 #include "SMObject.h"
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-
 #include <turbojpeg.h>
+#include <conio.h>
+#using <System.dll>
+#include <SMObject.h>
+#include <smstructs.h>
+using namespace System;
+using namespace System::Diagnostics;
+using namespace System::Threading;
 
 void display();
 void idle();
@@ -20,8 +24,7 @@ GLuint tex;
 zmq::context_t context(1);
 zmq::socket_t subscriber(context, ZMQ_SUB);
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
 	//Define window size
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -41,14 +44,33 @@ int main(int argc, char** argv)
 	subscriber.connect("tcp://192.168.1.200:26000");
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	double TimeStamp;
+	__int64 Frequency, Counter;
+	int Shutdown = 0x00;
+
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	while (1) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
+		Console::WriteLine("Camera time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
+		Thread::Sleep(25);
+		if (PMData->Shutdown.Status)
+			break;
+		if (_kbhit())
+			break;
+	}
+
 	glutMainLoop();
 
 	return 1;
 }
 
 
-void display()
-{
+void display(){
 	//Set camera as gl texture
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
@@ -63,8 +85,7 @@ void display()
 	glEnd();
 	glutSwapBuffers();
 }
-void idle()
-{
+void idle(){
 
 	//receive from zmq
 	zmq::message_t update;

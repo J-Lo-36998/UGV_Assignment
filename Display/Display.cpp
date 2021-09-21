@@ -38,6 +38,13 @@
 #include "Messages.hpp"
 #include "HUD.hpp"
 
+
+#include <conio.h>
+#include <Windows.h>
+#using <System.dll>
+#include <SMObject.h>
+#include <smstructs.h>
+
 void display();
 void reshape(int width, int height);
 void idle();
@@ -54,6 +61,9 @@ void motion(int x, int y);
 using namespace std;
 using namespace scos;
 
+using namespace System;
+using namespace System::Diagnostics;
+using namespace System::Threading;
 // Used to store the previous mouse location so we
 //   can calculate relative mouse movement.
 int prev_mouse_x = -1;
@@ -100,7 +110,25 @@ int main(int argc, char ** argv) {
 	// -------------------------------------------------------------------------
 	vehicle = new MyVehicle();
 
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	double TimeStamp;
+	__int64 Frequency, Counter;
+	int Shutdown = 0x00;
 
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	while (1) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
+		Console::WriteLine("GPS time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
+		Thread::Sleep(25);
+		if (PMData->Shutdown.Status)
+			break;
+		if (_kbhit())
+			break;
+	}
 	glutMainLoop();
 
 	if (vehicle != NULL) {

@@ -126,12 +126,13 @@
     <ClInclude Include="Vehicle.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Downloads\Code For students_updated (2)\Code For students_updated\SMObject.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="KeyManager.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Display.cpp" />
     <ClCompile Include="Messages.cpp" />
     <ClCompile Include="MyVehicle.cpp" />
     <ClCompile Include="Quaternion.cpp" />
