@@ -64,7 +64,7 @@ int main(int argc, char** argv){
 			break;
 	}
 
-	glutMainLoop();
+	//glutMainLoop();
 
 	return 1;
 }

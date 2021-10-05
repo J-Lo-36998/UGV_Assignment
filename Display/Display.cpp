@@ -129,7 +129,7 @@ int main(int argc, char ** argv) {
 		if (_kbhit())
 			break;
 	}
-	glutMainLoop();
+	//glutMainLoop();
 
 	if (vehicle != NULL) {
 		delete vehicle;
