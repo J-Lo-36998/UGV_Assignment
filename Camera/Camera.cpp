@@ -18,6 +18,19 @@ using namespace System::Threading;
 void display();
 void idle();
 
+int CameraHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.Camera == 0 && counter <= 3) {
+		printf("%d", PMData->Heartbeat.Flags.Camera);
+		PMData->Heartbeat.Flags.Camera = 1;
+		printf("%d", PMData->Heartbeat.Flags.Camera);
+		return 0;
+	}
+	else {
+		Thread::Sleep(250);
+		return 1;
+	}
+}
+
 GLuint tex;
 
 //ZMQ settings
@@ -54,11 +67,21 @@ int main(int argc, char** argv){
 	PMObj.SMAccess();
 	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 	while (1) {
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
-		Console::WriteLine("Camera time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
+		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
+		//Console::WriteLine("Camera time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		Thread::Sleep(25);
-		if (PMData->Shutdown.Status)
+		int counter = 0;
+		int fail = 0;
+		while (counter <= 3) {
+			fail += CameraHeartBeat(PMData, counter);
+			if (fail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+			}
+			counter++;
+		}
+		
+		if (PMData->Shutdown.Status == 0xFF)
 			break;
 		if (_kbhit())
 			break;

@@ -130,6 +130,7 @@
 #include <conio.h>
 #include <SMObject.h>
 #include <smstructs.h>
+#include <array>
 #include "SMStructs.h"
 #include "SMObject.h"
 
@@ -137,8 +138,9 @@ using namespace System;
 using namespace System::Net::Sockets;
 using namespace System::Net;
 using namespace System::Text;
-
-#define NUM_UNITS 5
+using namespace System::Diagnostics;
+using namespace System::Threading;
+#define NUM_UNITS 2
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
@@ -146,12 +148,34 @@ void StartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
-	TEXT("GPS.exe"),
 	TEXT("LASER.exe"),
+	TEXT("GPS.exe"),
 	TEXT("Display.exe"),
 	TEXT("Camera.exe"),
 	TEXT("Vehicle.exe")
 };
+
+int LaserPmHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.Laser == 1) {
+		PMData->Heartbeat.Flags.Laser = 0;
+		return 0;
+	}
+	else {
+		Thread::Sleep(500);
+		return 1;
+	}
+}
+
+int GpsPmHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.GPS == 1) {
+		PMData->Heartbeat.Flags.GPS = 0;
+		return 0;
+	}
+	else {
+		Thread::Sleep(500);
+		return 1;
+	}
+}
 
 int main()
 {
@@ -161,11 +185,29 @@ int main()
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-	Console::ReadKey();
+	//Console::ReadKey();
+	while (!_kbhit()) {
+		int FailCheck = { 0 };
+		std::array<int, NUM_UNITS> ProcessFailed = {0};
+		while (FailCheck <= 3) {
+			ProcessFailed[0] += LaserPmHeartBeat(PMData, FailCheck);
+			ProcessFailed[1] += GpsPmHeartBeat(PMData, FailCheck);
+			//Critical Procesess
+			if (ProcessFailed[0] >= 3) {
+				PMData->Shutdown.Status = 0xFF;
+			}
+
+			//non-critical processes
+			if (ProcessFailed[1] >= 3) {
+				printf("cum");
+				PMData->Shutdown.Status = 0x8;
+			}
+			FailCheck++;
+		}
+	}
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
 }
-
 
 //Is process running function
 bool IsProcessRunning(const char* processName)

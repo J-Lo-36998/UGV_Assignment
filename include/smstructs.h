@@ -47,6 +47,9 @@ struct UnitFlags
 					OpenGL : 1,				//NONCRITICAL
 					Camera : 1,				//NONCRITICAL
 					Garbage : 2;
+	/*unsigned char Laser : 1, 
+		Display : 1, Vehicle : 1, GPS : 1, Camera : 1, Garbage : 3;*/
+					
 };
 
 union ExecFlags

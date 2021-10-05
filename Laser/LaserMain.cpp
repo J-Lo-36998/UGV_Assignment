@@ -8,6 +8,18 @@ using namespace System::Diagnostics;
 using namespace System::Threading;
 int counter{ 0 };
 
+int LaserHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.Laser == 0 && counter <= 3) {
+		printf("%d", PMData->Heartbeat.Flags.Laser);
+		PMData->Heartbeat.Flags.Laser = 1;
+		printf("%d", PMData->Heartbeat.Flags.Laser);
+		return 0;
+	}
+	else {
+		Thread::Sleep(250);
+		return 1;
+	}
+}
 int main() {
 	//Declaration
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
@@ -31,11 +43,6 @@ int main() {
 			TSvalues[TScounter++] = TimeGap;
 		}
 		Thread::Sleep(25);
-		if (PMData->Shutdown.Status)
-			break;
-		if (_kbhit())
-			break;
-
 		//Did PM put my flag down?
 			//true-> put flag up
 			//false-> is the pm time stamp older by agreed time gap
@@ -43,6 +50,19 @@ int main() {
 				//
 		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		//PMData->Heartbeat.Flags.Laser = 0;
+		int counter = 0;
+		int fail = 0;
+		while (counter <= 3) {
+			fail += LaserHeartBeat(PMData, counter);
+			if (fail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+			}
+			counter++;
+		}
+		if (PMData->Shutdown.Status == 0xFF)
+			break;
+		if (_kbhit())
+			break;
 	}
 	for (int i = 0; i < 100; i++) {
 		Console::WriteLine("{0,12:F3}", TSvalues[i]);
