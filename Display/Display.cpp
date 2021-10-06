@@ -75,8 +75,8 @@ double speed = 0;
 double steering = 0;
 
 
-int DisplayHeartBeat(ProcessManagement* PMData, int counter) {
-	if (PMData->Heartbeat.Flags.OpenGL == 0 && counter <= 3) {
+int DisplayHeartBeat(ProcessManagement* PMData, int FailCheck) {
+	if (PMData->Heartbeat.Flags.OpenGL == 0 && FailCheck <= 3) {
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
 		PMData->Heartbeat.Flags.OpenGL = 1;
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
@@ -136,21 +136,23 @@ int main(int argc, char ** argv) {
 		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
 		//Console::WriteLine("GPS time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
+		
+		//PMData->Heartbeat.Flags.OpenGL = 0;
 		Thread::Sleep(25);
-		int counter = 0;
-		int fail = 0;
-		while (counter <= 3) {
-			fail += DisplayHeartBeat(PMData, counter);
-			if (fail > 3) {
+		int FailCheck{ 0 };
+		int failure{ 0 };
+		while (FailCheck <= 3) {
+			failure += DisplayHeartBeat(PMData, FailCheck);
+			if (failure > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			counter++;
+			FailCheck++;
 		}
 		if (PMData->Shutdown.Status == 0xFF)
 			break;
 		if (_kbhit())
 			break;
-	}
+		}
 	//glutMainLoop();
 
 	if (vehicle != NULL) {

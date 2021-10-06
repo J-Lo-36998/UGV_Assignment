@@ -9,8 +9,8 @@ using namespace System::Diagnostics;
 using namespace System::Threading;
 
 
-int GPSHeartBeat(ProcessManagement* PMData, int counter) {
-	if (PMData->Heartbeat.Flags.GPS == 0 && counter <= 3) {
+int GPSHeartBeat(ProcessManagement* PMData, int FailCheck) {
+	if (PMData->Heartbeat.Flags.GPS == 0 && FailCheck <= 3) {
 		printf("%d", PMData->Heartbeat.Flags.GPS);
 		PMData->Heartbeat.Flags.GPS = 1;
 		printf("%d", PMData->Heartbeat.Flags.GPS);
@@ -35,8 +35,8 @@ int main() {
 	PMObj.SMAccess();
 	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 	while (1) {
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
+		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
 		//Console::WriteLine("GPS time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		Thread::Sleep(25);
 		//Did PM put my flag down?
@@ -45,18 +45,17 @@ int main() {
 				//True->shutdown all
 				//
 		//PMData->Heartbeat.Flags.GPS = 0;
-		int counter = 0;
-		int strike = 0;
-		int fail = 0;
-		while (counter <= 3) {
-			fail += GPSHeartBeat(PMData, counter);
-			if (fail > 3) {
+		int FailCheck{ 0 };
+		int failure{ 0 };
+		while (FailCheck <= 3) {
+			failure += GPSHeartBeat(PMData, FailCheck);
+			if (failure > 3) {
 				printf("PM dead critical failure, shut down");
 				PMData->Shutdown.Status = 0xFF;
 			}
-			counter++;
+			FailCheck++;
 		}
-		if (PMData->Shutdown.Status == 0xFF)
+		if (PMData->Shutdown.Flags.GPS == 1)
 			break;
 		if (_kbhit())
 			break;

@@ -140,11 +140,11 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-#define NUM_UNITS 2
+#define NUM_UNITS 5
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
-
+void RestartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
@@ -166,6 +166,28 @@ int LaserPmHeartBeat(ProcessManagement* PMData, int counter) {
 	}
 }
 
+int DisplayPmHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.OpenGL == 1) {
+		PMData->Heartbeat.Flags.OpenGL = 0;
+		return 0;
+	}
+	else {
+		Thread::Sleep(500);
+		return 1;
+	}
+}
+
+int VehiclePmHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.VehicleControl == 1) {
+		PMData->Heartbeat.Flags.VehicleControl = 0;
+		return 0;
+	}
+	else {
+		Thread::Sleep(500);
+		return 1;
+	}
+}
+
 int GpsPmHeartBeat(ProcessManagement* PMData, int counter) {
 	if (PMData->Heartbeat.Flags.GPS == 1) {
 		PMData->Heartbeat.Flags.GPS = 0;
@@ -177,8 +199,21 @@ int GpsPmHeartBeat(ProcessManagement* PMData, int counter) {
 	}
 }
 
-int main()
-{
+
+int CameraPmHeartBeat(ProcessManagement* PMData, int counter) {
+	if (PMData->Heartbeat.Flags.Camera == 1) {
+		PMData->Heartbeat.Flags.Camera = 0;
+		return 0;
+	}
+	else {
+		Thread::Sleep(500);
+		return 1;
+	}
+}
+
+
+
+int main(){
 	//start all 5 modules
 	StartProcesses();
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
@@ -191,19 +226,41 @@ int main()
 		std::array<int, NUM_UNITS> ProcessFailed = {0};
 		while (FailCheck <= 3) {
 			ProcessFailed[0] += LaserPmHeartBeat(PMData, FailCheck);
-			ProcessFailed[1] += GpsPmHeartBeat(PMData, FailCheck);
+			ProcessFailed[1] += DisplayPmHeartBeat(PMData, FailCheck);
+			ProcessFailed[2] += VehiclePmHeartBeat(PMData, FailCheck);
+			ProcessFailed[3] += GpsPmHeartBeat(PMData, FailCheck);
+			ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);
 			//Critical Procesess
 			if (ProcessFailed[0] >= 3) {
+				Console::WriteLine("Critical Failure of Laser Module. Shutting down.");
 				PMData->Shutdown.Status = 0xFF;
 			}
-
-			//non-critical processes
 			if (ProcessFailed[1] >= 3) {
-				printf("cum");
-				PMData->Shutdown.Status = 0x8;
+				Console::WriteLine("Critical Failure of Display Module. Shutting down.");
+				PMData->Shutdown.Status = 0xFF;
+			}
+			if (ProcessFailed[2] >= 3) {
+				Console::WriteLine("Critical Failure of Vehicle Control. Shutting down.");
+				PMData->Shutdown.Status = 0xFF;
+			}
+			//non-critical processes
+			if (ProcessFailed[3] >= 3) {
+				Console::WriteLine("Non-critical failure of GPS, Restarting");
+				PMData->Shutdown.Flags.GPS = 1;
+				RestartProcesses();
+
+			}
+			if (ProcessFailed[4] >= 3) {
+				Console::WriteLine("Non-critical failure of Camera, Restarting");
+				PMData->Shutdown.Flags.Camera = 1;
+				RestartProcesses();
 			}
 			FailCheck++;
 		}
+		/*if (PMData->Shutdown.Status == 0xFF)
+			break;*/
+		if (_kbhit())
+			break;
 	}
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
@@ -252,3 +309,26 @@ void StartProcesses()
 	}
 }
 
+void RestartProcesses()
+{
+	STARTUPINFO s[10];
+	PROCESS_INFORMATION p[10];
+
+	for (int i = 0; i < NUM_UNITS; i++)
+	{
+		if (!IsProcessRunning(Units[i]))
+		{
+			ZeroMemory(&s[i], sizeof(s[i]));
+			s[i].cb = sizeof(s[i]);
+			ZeroMemory(&p[i], sizeof(p[i]));
+
+			if (!CreateProcess(NULL, Units[i], NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &s[i], &p[i]))
+			{
+				printf("%s failed (%d).\n", Units[i], GetLastError());
+				_getch();
+			}
+			std::cout << "Restarting: " << Units[i] << std::endl;
+			Sleep(100);
+		}
+	}
+}

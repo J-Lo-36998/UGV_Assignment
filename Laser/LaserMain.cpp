@@ -8,8 +8,8 @@ using namespace System::Diagnostics;
 using namespace System::Threading;
 int counter{ 0 };
 
-int LaserHeartBeat(ProcessManagement* PMData, int counter) {
-	if (PMData->Heartbeat.Flags.Laser == 0 && counter <= 3) {
+int LaserHeartBeat(ProcessManagement* PMData, int FailCheck) {
+	if (PMData->Heartbeat.Flags.Laser == 0 && FailCheck <= 3) {
 		printf("%d", PMData->Heartbeat.Flags.Laser);
 		PMData->Heartbeat.Flags.Laser = 1;
 		printf("%d", PMData->Heartbeat.Flags.Laser);
@@ -50,16 +50,16 @@ int main() {
 				//
 		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		//PMData->Heartbeat.Flags.Laser = 0;
-		int counter = 0;
-		int fail = 0;
-		while (counter <= 3) {
-			fail += LaserHeartBeat(PMData, counter);
-			if (fail > 3) {
+		int FailCheck{ 0 };
+		int failure{ 0 };
+		while (FailCheck <= 3) {
+			failure += LaserHeartBeat(PMData, FailCheck);
+			if (failure > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			counter++;
+			FailCheck++;
 		}
-		if (PMData->Shutdown.Status == 0xFF)
+		if (PMData->Shutdown.Flags.Laser == 1)
 			break;
 		if (_kbhit())
 			break;

@@ -18,8 +18,8 @@ using namespace System::Threading;
 void display();
 void idle();
 
-int CameraHeartBeat(ProcessManagement* PMData, int counter) {
-	if (PMData->Heartbeat.Flags.Camera == 0 && counter <= 3) {
+int CameraHeartBeat(ProcessManagement* PMData, int FailChecker) {
+	if (PMData->Heartbeat.Flags.Camera == 0 && FailChecker <= 3) {
 		printf("%d", PMData->Heartbeat.Flags.Camera);
 		PMData->Heartbeat.Flags.Camera = 1;
 		printf("%d", PMData->Heartbeat.Flags.Camera);
@@ -71,17 +71,18 @@ int main(int argc, char** argv){
 		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
 		//Console::WriteLine("Camera time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		Thread::Sleep(25);
-		int counter = 0;
-		int fail = 0;
-		while (counter <= 3) {
-			fail += CameraHeartBeat(PMData, counter);
-			if (fail > 3) {
+		//PMData->Heartbeat.Flags.Camera = 0;
+		int FailCheck{ 0 };
+		int failure{ 0 };
+		while (FailCheck <= 3) {
+			failure += CameraHeartBeat(PMData, FailCheck);
+			if (failure > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			counter++;
+			FailCheck++;
 		}
 		
-		if (PMData->Shutdown.Status == 0xFF)
+		if (PMData->Shutdown.Flags.Camera == 1)
 			break;
 		if (_kbhit())
 			break;
