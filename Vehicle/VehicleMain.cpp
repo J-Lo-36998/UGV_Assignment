@@ -36,7 +36,7 @@ int main() {
 		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
 		//Console::WriteLine("GPS time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
-		//Thread::Sleep(25);
+		Thread::Sleep(25);
 		int FailCheck{ 0 };
 		int failure{ 0 };
 		while (FailCheck <= 3) {

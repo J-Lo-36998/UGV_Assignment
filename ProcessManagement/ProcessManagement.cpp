@@ -140,7 +140,7 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-#define NUM_UNITS 4
+#define NUM_UNITS 5
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
@@ -199,7 +199,6 @@ int GpsPmHeartBeat(ProcessManagement* PMData, int counter) {
 	}
 }
 
-
 int CameraPmHeartBeat(ProcessManagement* PMData, int counter) {
 	if (PMData->Heartbeat.Flags.Camera == 1) {
 		PMData->Heartbeat.Flags.Camera = 0;
@@ -210,8 +209,6 @@ int CameraPmHeartBeat(ProcessManagement* PMData, int counter) {
 		return 1;
 	}
 }
-
-
 
 int main(){
 	//start all 5 modules
@@ -229,15 +226,18 @@ int main(){
 			ProcessFailed[1] += DisplayPmHeartBeat(PMData, FailCheck);
 			ProcessFailed[2] += VehiclePmHeartBeat(PMData, FailCheck);
 			ProcessFailed[3] += GpsPmHeartBeat(PMData, FailCheck);
-			/*ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);*/
+			ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);
 			//Critical Procesess
 			if (ProcessFailed[0] > 3) {
 				PMData->Shutdown.Status = 0xFF;
+				Console::WriteLine("Critical failure of Laser, shutting down");
 			}
 			if (ProcessFailed[1] > 3) {
+				Console::WriteLine("Critical failure of Display, shutting down");
 				PMData->Shutdown.Status = 0xFF;
 			}
 			if (ProcessFailed[2] > 3) {
+				Console::WriteLine("Critical failure of Vehicle, shutting down");
 				PMData->Shutdown.Status = 0xFF;
 			}
 			////non-critical processes
@@ -247,15 +247,15 @@ int main(){
 				RestartProcesses();
 
 			}
-			//if (ProcessFailed[4] > 3) {
-			//	Console::WriteLine("Non-critical failure of Camera, Restarting");
-			//	PMData->Shutdown.Flags.Camera = 1;
-			//	RestartProcesses();
-			//}
+			if (ProcessFailed[4] > 3) {
+				Console::WriteLine("Non-critical failure of Camera, Restarting");
+				PMData->Shutdown.Flags.Camera = 1;
+				RestartProcesses();
+			}
 			FailCheck++;
 		}
-		if (PMData->Shutdown.Status == 0xFF)
-			break;
+		/*if (PMData->Shutdown.Status == 0xFF)
+			break;*/
 		if (_kbhit())
 			break;
 	}

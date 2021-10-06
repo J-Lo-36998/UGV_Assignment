@@ -3,9 +3,14 @@
 #using <System.dll>
 #include <SMObject.h>
 #include <smstructs.h>
+#include <array>
+#include "UGV_module.h"
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Threading;
+using namespace Net;
+using namespace Sockets;
+using namespace Text;
 int counter{ 0 };
 
 int LaserHeartBeat(ProcessManagement* PMData, int FailCheck) {
@@ -21,7 +26,40 @@ int LaserHeartBeat(ProcessManagement* PMData, int FailCheck) {
 	}
 }
 int main() {
-	//Declaration
+
+	//Tcp client delcaration and initialisation
+	//TcpClient^ Client;
+	//int PortNumber = 23000;
+	//Client = gcnew TcpClient("192.168.1.200", PortNumber);
+	//Client->NoDelay = TRUE;
+	//Client->ReceiveTimeout = 500;
+	//Client->SendTimeout = 500;
+	//Client->ReceiveBufferSize = 1024;
+	//Client->SendBufferSize = 1024;
+	//array<unsigned char>^ SendData;
+	//SendData = gcnew array<unsigned char>(1024);
+
+	//SM_VehicleControl Data;
+
+	//String^ Message;
+	////Sending Data
+	//Message = gcnew String("#");
+	//Message = Message + Data.Steering.ToString("F3") + " " + Data.Speed.ToString("F3") + "1 #";
+	//
+	//SendData = Encoding::ASCII->GetBytes(Message);
+
+
+	////Send to Server
+	//SM_Laser LaserData;
+	//unsigned char* BytePtr;
+	//BytePtr = (unsigned char*)(&LaserData);
+	//for (int i{ 0 }; i < sizeof(SM_Laser); i++) {
+	//	SendData[i] = *(BytePtr + i);
+	//}
+	//NetworkStream^ Stream = Client->GetStream();
+	//Stream->Write(SendData, 0, SendData->Length);
+
+	//Shared memory Declaration and initialisation
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	int TScounter = 0;
 	array<double>^ TSvalues = gcnew array<double>(100);
