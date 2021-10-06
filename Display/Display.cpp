@@ -83,7 +83,7 @@ int DisplayHeartBeat(ProcessManagement* PMData, int FailCheck) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(250);
+		Thread::Sleep(500);
 		return 1;
 	}
 }

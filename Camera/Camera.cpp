@@ -26,7 +26,7 @@ int CameraHeartBeat(ProcessManagement* PMData, int FailChecker) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(250);
+		Thread::Sleep(500);
 		return 1;
 	}
 }
@@ -73,7 +73,7 @@ int main(int argc, char** argv){
 		Thread::Sleep(25);
 		//PMData->Heartbeat.Flags.Camera = 0;
 		int FailCheck{ 0 };
-		int failure{ 0 };
+		int failure { 0};
 		while (FailCheck <= 3) {
 			failure += CameraHeartBeat(PMData, FailCheck);
 			if (failure > 3) {

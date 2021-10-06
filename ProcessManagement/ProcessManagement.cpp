@@ -140,7 +140,7 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-#define NUM_UNITS 5
+#define NUM_UNITS 4
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
@@ -149,10 +149,10 @@ void RestartProcesses();
 TCHAR Units[10][20] = //
 {
 	TEXT("LASER.exe"),
-	TEXT("GPS.exe"),
 	TEXT("Display.exe"),
-	TEXT("Camera.exe"),
-	TEXT("Vehicle.exe")
+	TEXT("Vehicle.exe"),
+	TEXT("GPS.exe"),
+	TEXT("Camera.exe")
 };
 
 int LaserPmHeartBeat(ProcessManagement* PMData, int counter) {
@@ -229,36 +229,33 @@ int main(){
 			ProcessFailed[1] += DisplayPmHeartBeat(PMData, FailCheck);
 			ProcessFailed[2] += VehiclePmHeartBeat(PMData, FailCheck);
 			ProcessFailed[3] += GpsPmHeartBeat(PMData, FailCheck);
-			ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);
+			/*ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);*/
 			//Critical Procesess
-			if (ProcessFailed[0] >= 3) {
-				Console::WriteLine("Critical Failure of Laser Module. Shutting down.");
+			if (ProcessFailed[0] > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			if (ProcessFailed[1] >= 3) {
-				Console::WriteLine("Critical Failure of Display Module. Shutting down.");
+			if (ProcessFailed[1] > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			if (ProcessFailed[2] >= 3) {
-				Console::WriteLine("Critical Failure of Vehicle Control. Shutting down.");
+			if (ProcessFailed[2] > 3) {
 				PMData->Shutdown.Status = 0xFF;
 			}
-			//non-critical processes
-			if (ProcessFailed[3] >= 3) {
+			////non-critical processes
+			if (ProcessFailed[3] > 3) {
 				Console::WriteLine("Non-critical failure of GPS, Restarting");
 				PMData->Shutdown.Flags.GPS = 1;
 				RestartProcesses();
 
 			}
-			if (ProcessFailed[4] >= 3) {
-				Console::WriteLine("Non-critical failure of Camera, Restarting");
-				PMData->Shutdown.Flags.Camera = 1;
-				RestartProcesses();
-			}
+			//if (ProcessFailed[4] > 3) {
+			//	Console::WriteLine("Non-critical failure of Camera, Restarting");
+			//	PMData->Shutdown.Flags.Camera = 1;
+			//	RestartProcesses();
+			//}
 			FailCheck++;
 		}
-		/*if (PMData->Shutdown.Status == 0xFF)
-			break;*/
+		if (PMData->Shutdown.Status == 0xFF)
+			break;
 		if (_kbhit())
 			break;
 	}
