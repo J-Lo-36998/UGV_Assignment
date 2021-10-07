@@ -18,7 +18,7 @@
     <ClCompile Include="LaserMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\SMObject.cpp">
+    <ClCompile Include="SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

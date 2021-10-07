@@ -112,8 +112,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\Code For students_updated (2)\Code For students_updated\SMObject.cpp" />
     <ClCompile Include="ProcessManagement.cpp" />
+    <ClCompile Include="SMObject.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

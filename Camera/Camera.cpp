@@ -88,7 +88,7 @@ int main(int argc, char** argv){
 			break;
 	}
 
-	//glutMainLoop();
+	glutMainLoop();
 
 	return 1;
 }
@@ -138,7 +138,6 @@ void idle(){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
 		delete[] buffer;
 	}
-
 	display();
 }
 

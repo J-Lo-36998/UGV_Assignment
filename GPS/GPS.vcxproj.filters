@@ -26,7 +26,7 @@
     <ClCompile Include="GPSMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\Code For students_updated (2)\Code For students_updated\SMObject.cpp">
+    <ClCompile Include="SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

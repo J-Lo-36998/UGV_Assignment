@@ -84,6 +84,7 @@ int DisplayHeartBeat(ProcessManagement* PMData, int FailCheck) {
 	}
 	else {
 		Thread::Sleep(500);
+		
 		return 1;
 	}
 }

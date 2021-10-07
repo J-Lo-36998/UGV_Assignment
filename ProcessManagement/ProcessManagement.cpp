@@ -169,6 +169,7 @@ int LaserPmHeartBeat(ProcessManagement* PMData, int counter) {
 int DisplayPmHeartBeat(ProcessManagement* PMData, int counter) {
 	if (PMData->Heartbeat.Flags.OpenGL == 1) {
 		PMData->Heartbeat.Flags.OpenGL = 0;
+		
 		return 0;
 	}
 	else {
@@ -227,12 +228,12 @@ int main(){
 			ProcessFailed[2] += VehiclePmHeartBeat(PMData, FailCheck);
 			ProcessFailed[3] += GpsPmHeartBeat(PMData, FailCheck);
 			ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);
-			//Critical Procesess
+			////Critical Procesess
 			if (ProcessFailed[0] > 3) {
 				PMData->Shutdown.Status = 0xFF;
 				Console::WriteLine("Critical failure of Laser, shutting down");
 			}
-			if (ProcessFailed[1] > 3) {
+			if (ProcessFailed[0] > 3) {
 				Console::WriteLine("Critical failure of Display, shutting down");
 				PMData->Shutdown.Status = 0xFF;
 			}
