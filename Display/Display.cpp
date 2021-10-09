@@ -37,7 +37,7 @@
 
 #include "Messages.hpp"
 #include "HUD.hpp"
-
+#include "UGV_module.h"
 
 #include <conio.h>
 #include <Windows.h>
@@ -73,23 +73,33 @@ int prev_mouse_y = -1;
 Vehicle * vehicle = NULL;
 double speed = 0;
 double steering = 0;
+int setup = 0;
+int failure{ 0 };
 
+//Declaring Shared memory
+SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* PMData;
 
-int DisplayHeartBeat(ProcessManagement* PMData, int FailCheck) {
-	if (PMData->Heartbeat.Flags.OpenGL == 0 && FailCheck <= 3) {
+int DisplayHeartBeat(ProcessManagement* PMData) {
+	if (PMData->Heartbeat.Flags.OpenGL == 0) {
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
 		PMData->Heartbeat.Flags.OpenGL = 1;
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
-		
+		//Thread::Sleep(500);
 		return 1;
 	}
 }
 //int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char ** argv) {
+
+	//Instantiating Shared Memory
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	PMData = (ProcessManagement*)PMObj.pData;
+
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -122,39 +132,8 @@ int main(int argc, char ** argv) {
 	//   with the name of the class you want to show as the current 
 	//   custom vehicle.
 	// -------------------------------------------------------------------------
-	vehicle = new MyVehicle();
-
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	double TimeStamp;
-	__int64 Frequency, Counter;
-	int Shutdown = 0x00;
-
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-	while (1) {
-		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
-		//Console::WriteLine("GPS time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
-		
-		//PMData->Heartbeat.Flags.OpenGL = 0;
-		Thread::Sleep(25);
-		int FailCheck{ 0 };
-		int failure{ 0 };
-		while (FailCheck <= 3) {
-			failure += DisplayHeartBeat(PMData, FailCheck);
-			if (failure > 3) {
-				PMData->Shutdown.Status = 0xFF;
-			}
-			FailCheck++;
-		}
-		if (PMData->Shutdown.Status == 0xFF)
-			break;
-		if (_kbhit())
-			break;
-		}
-	//glutMainLoop();
+	vehicle = new MyVehicle();	
+	glutMainLoop();
 
 	if (vehicle != NULL) {
 		delete vehicle;
@@ -191,8 +170,6 @@ void display() {
 		vehicle->draw();
 
 	}
-
-
 	// draw HUD
 	HUD::Draw();
 
@@ -271,28 +248,38 @@ void idle() {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
 	}
 
-
-
-
 	const float sleep_time_between_frames_in_seconds = 0.025;
 
 	static double previousTime = getTime();
 	const double currTime = getTime();
 	const double elapsedTime = currTime - previousTime;
 	previousTime = currTime;
-
+	
+	display();
+	
 	// do a simulation step
 	if (vehicle != NULL) {
 		vehicle->update(speed, steering, elapsedTime);
 	}
-
-	display();
-
+	//HeartBeat Logic
+	if (DisplayHeartBeat(PMData) == 0){
+		failure = 0;
+	}
+	else {
+		failure++;
+	}
+	if (failure > 50) {
+		//Console::ReadKey();
+		PMData->Shutdown.Status = 0xFF;
+	}
 #ifdef _WIN32 
 	Sleep(sleep_time_between_frames_in_seconds * 1000);
 #else
 	usleep(sleep_time_between_frames_in_seconds * 1e6);
 #endif
+	if (PMData->Shutdown.Status == 0xFF) {
+		exit(0);
+	}
 };
 
 void keydown(unsigned char key, int x, int y) {

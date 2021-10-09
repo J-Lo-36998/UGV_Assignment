@@ -18,9 +18,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

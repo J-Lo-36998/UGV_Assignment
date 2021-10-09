@@ -173,7 +173,7 @@ int DisplayPmHeartBeat(ProcessManagement* PMData, int counter) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
+		Thread::Sleep(250);
 		return 1;
 	}
 }
@@ -206,7 +206,7 @@ int CameraPmHeartBeat(ProcessManagement* PMData, int counter) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
+		Thread::Sleep(250);
 		return 1;
 	}
 }
@@ -233,7 +233,7 @@ int main(){
 				PMData->Shutdown.Status = 0xFF;
 				Console::WriteLine("Critical failure of Laser, shutting down");
 			}
-			if (ProcessFailed[0] > 3) {
+			if (ProcessFailed[1] > 3) {
 				Console::WriteLine("Critical failure of Display, shutting down");
 				PMData->Shutdown.Status = 0xFF;
 			}
@@ -241,7 +241,7 @@ int main(){
 				Console::WriteLine("Critical failure of Vehicle, shutting down");
 				PMData->Shutdown.Status = 0xFF;
 			}
-			////non-critical processes
+			//////non-critical processes
 			if (ProcessFailed[3] > 3) {
 				Console::WriteLine("Non-critical failure of GPS, Restarting");
 				PMData->Shutdown.Flags.GPS = 1;
@@ -255,11 +255,13 @@ int main(){
 			}
 			FailCheck++;
 		}
-		/*if (PMData->Shutdown.Status == 0xFF)
-			break;*/
+		if (PMData->Shutdown.Status == 0xFF)
+			break;
 		if (_kbhit())
 			break;
 	}
+	Console::WriteLine("Please Press Key to Exit");
+	Console::ReadKey();
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
 }

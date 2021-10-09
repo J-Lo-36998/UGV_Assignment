@@ -17,16 +17,19 @@ using namespace System::Threading;
 
 void display();
 void idle();
+int failure{ 0 };
+//Declaring Shared Memory
+SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* PMData;
 
-int CameraHeartBeat(ProcessManagement* PMData, int FailChecker) {
-	if (PMData->Heartbeat.Flags.Camera == 0 && FailChecker <= 3) {
+int CameraHeartBeat(ProcessManagement* PMData) {
+	if (PMData->Heartbeat.Flags.Camera == 0) {
 		printf("%d", PMData->Heartbeat.Flags.Camera);
 		PMData->Heartbeat.Flags.Camera = 1;
 		printf("%d", PMData->Heartbeat.Flags.Camera);
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
 		return 1;
 	}
 }
@@ -57,39 +60,11 @@ int main(int argc, char** argv){
 	subscriber.connect("tcp://192.168.1.200:26000");
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	double TimeStamp;
-	__int64 Frequency, Counter;
-	int Shutdown = 0x00;
-
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	//Instantiating Shared Memory
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-	while (1) {
-		//QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		//TimeStamp = (double)Counter / (double)Frequency * 1000; //ms
-		//Console::WriteLine("Camera time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
-		Thread::Sleep(25);
-		//PMData->Heartbeat.Flags.Camera = 0;
-		int FailCheck{ 0 };
-		int failure { 0};
-		while (FailCheck <= 3) {
-			failure += CameraHeartBeat(PMData, FailCheck);
-			if (failure > 3) {
-				PMData->Shutdown.Status = 0xFF;
-			}
-			FailCheck++;
-		}
-		
-		if (PMData->Shutdown.Flags.Camera == 1)
-			break;
-		if (_kbhit())
-			break;
-	}
-
+	PMData = (ProcessManagement*)PMObj.pData;
 	glutMainLoop();
-
 	return 1;
 }
 
@@ -138,6 +113,20 @@ void idle(){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
 		delete[] buffer;
 	}
+
 	display();
+	//HeartBeat Logic
+	if (CameraHeartBeat(PMData) == 0) {
+		failure = 0;
+	}
+	else {
+		failure++;
+	}
+	if (failure > 100) {
+		PMData->Shutdown.Status = 0xFF;
+	}
+	if (PMData->Shutdown.Status == 0xFF) {
+		exit(0);
+	}
 }
 

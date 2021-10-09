@@ -80,7 +80,7 @@ int main() {
 		if (TScounter < 100) {
 			TSvalues[TScounter++] = TimeGap;
 		}
-		//Thread::Sleep(25);
+		Thread::Sleep(25);
 		//Did PM put my flag down?
 			//true-> put flag up
 			//false-> is the pm time stamp older by agreed time gap
