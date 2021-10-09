@@ -45,7 +45,6 @@ int main() {
 		else {
 			failure++;
 		}
-		printf("\n%d cock", failure);
 		if (failure > 100) {
 			//Console::ReadKey();
 			PMData->Shutdown.Status = 0xFF;

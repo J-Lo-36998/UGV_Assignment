@@ -30,6 +30,7 @@ int CameraHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
+		Thread::Sleep(500);
 		return 1;
 	}
 }
