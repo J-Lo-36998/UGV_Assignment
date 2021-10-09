@@ -20,6 +20,9 @@ using namespace System::Diagnostics;
 using namespace System::Threading;
 #define NUM_UNITS 5
 
+SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
 void RestartProcesses();
@@ -166,10 +169,10 @@ bool CameraFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
 int main(){
 	//start all 5 modules
 	StartProcesses();
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	PMData = (ProcessManagement*)PMObj.pData;
 	//Console::ReadKey();
 	int ProcessFailed[NUM_UNITS] = {0};
 	
