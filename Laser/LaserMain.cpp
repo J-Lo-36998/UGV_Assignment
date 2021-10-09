@@ -11,20 +11,23 @@ using namespace System::Threading;
 using namespace Net;
 using namespace Sockets;
 using namespace Text;
-int counter{ 0 };
+int failure{ 0 };
 
-int LaserHeartBeat(ProcessManagement* PMData, int FailCheck) {
-	if (PMData->Heartbeat.Flags.Laser == 0 && FailCheck <= 3) {
+SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* PMData;
+
+int LaserHeartBeat(ProcessManagement* PMData) {
+	if (PMData->Heartbeat.Flags.Laser == 0) {
 		printf("%d", PMData->Heartbeat.Flags.Laser);
 		PMData->Heartbeat.Flags.Laser = 1;
 		printf("%d", PMData->Heartbeat.Flags.Laser);
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
 		return 1;
 	}
 }
+
 int main() {
 
 	//Tcp client delcaration and initialisation
@@ -60,26 +63,12 @@ int main() {
 	//Stream->Write(SendData, 0, SendData->Length);
 
 	//Shared memory Declaration and initialisation
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	int TScounter = 0;
-	array<double>^ TSvalues = gcnew array<double>(100);
-	double TimeGap;
-	__int64 Frequency, Counter, oldCounter;
-	int Shutdown = 0x00;
-
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
-	QueryPerformanceFrequency((LARGE_INTEGER*)&oldCounter);
+	
 
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	PMData = (ProcessManagement*)PMObj.pData;
 	while (1) {
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		TimeGap = (double)(Counter - oldCounter) / (double)Frequency * 1000; //ms
-		oldCounter = Counter;
-		if (TScounter < 100) {
-			TSvalues[TScounter++] = TimeGap;
-		}
 		Thread::Sleep(25);
 		//Did PM put my flag down?
 			//true-> put flag up
@@ -88,22 +77,21 @@ int main() {
 				//
 		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		//PMData->Heartbeat.Flags.Laser = 0;
-		int FailCheck{ 0 };
-		int failure{ 0 };
-		while (FailCheck <= 3) {
-			failure += LaserHeartBeat(PMData, FailCheck);
-			if (failure > 3) {
-				PMData->Shutdown.Status = 0xFF;
-			}
-			FailCheck++;
+		if (LaserHeartBeat(PMData) == 0) {
+			failure = 0;
+		}
+		else {
+			failure++;
+		}
+		if (failure > 100) {
+			//Console::ReadKey();
+			printf("\n%d cock", failure);
+			PMData->Shutdown.Status = 0xFF;
 		}
 		if (PMData->Shutdown.Flags.Laser == 1)
 			break;
 		if (_kbhit())
 			break;
-	}
-	for (int i = 0; i < 100; i++) {
-		Console::WriteLine("{0,12:F3}", TSvalues[i]);
 	}
 	return 0;
 }

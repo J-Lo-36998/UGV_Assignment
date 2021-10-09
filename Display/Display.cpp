@@ -268,7 +268,7 @@ void idle() {
 	else {
 		failure++;
 	}
-	if (failure > 50) {
+	if (failure > 100) {
 		//Console::ReadKey();
 		PMData->Shutdown.Status = 0xFF;
 	}
