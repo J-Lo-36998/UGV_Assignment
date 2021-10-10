@@ -1,1 +1,2 @@
 C:\Users\Jordan\Documents\MTRN3500\UGV_Assignment\GPS\Debug\GPS.vcxproj.AssemblyReference.cache
+\\Client\C$\Users\Jordan\Documents\MTRN3500\UGV_Assignment\GPS\Debug\GPS.vcxproj.AssemblyReference.cache

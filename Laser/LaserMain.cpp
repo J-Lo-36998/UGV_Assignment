@@ -13,21 +13,11 @@ using namespace Sockets;
 using namespace Text;
 int failure{ 0 };
 
+SMObject LaserObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* LaserData = (ProcessManagement*)LaserObj.pData;
+
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-ProcessManagement* PMData;
-
-int LaserHeartBeat(ProcessManagement* PMData) {
-	if (PMData->Heartbeat.Flags.Laser == 0) {
-		printf("%d", PMData->Heartbeat.Flags.Laser);
-		PMData->Heartbeat.Flags.Laser = 1;
-		printf("%d", PMData->Heartbeat.Flags.Laser);
-		return 0;
-	}
-	else {
-		return 1;
-	}
-}
-
+ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 int main() {
 
 	//Tcp client delcaration and initialisation
@@ -63,13 +53,27 @@ int main() {
 	//Stream->Write(SendData, 0, SendData->Length);
 
 	//Shared memory Declaration and initialisation
-	
-
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
+
+	LaserObj.SMCreate();
+	LaserObj.SMAccess();
+	LaserData = (ProcessManagement*)LaserObj.pData;
 	while (1) {
-		Thread::Sleep(25);
+		if (LaserData->Heartbeat.Flags.Laser == 0) {
+			printf("%d", (LaserData->Heartbeat.Flags.Laser));
+			LaserData->Heartbeat.Flags.Laser = 0;
+			printf("%d", (LaserData->Heartbeat.Flags.Laser));
+			failure = 0;
+		}
+		else {
+			failure++;
+			if (failure > 50) {
+				PMData->Shutdown.Status = 0xFF;
+			}
+		}
+		//Thread::Sleep(25);
 		//Did PM put my flag down?
 			//true-> put flag up
 			//false-> is the pm time stamp older by agreed time gap
@@ -77,21 +81,12 @@ int main() {
 				//
 		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		//PMData->Heartbeat.Flags.Laser = 0;
-		if (LaserHeartBeat(PMData) == 0) {
-			failure = 0;
-		}
-		else {
-			failure++;
-		}
-		if (failure > 100) {
-			//Console::ReadKey();
-			printf("\n%d cock", failure);
-			PMData->Shutdown.Status = 0xFF;
-		}
-		if (PMData->Shutdown.Flags.Laser == 1)
+		
+		if (LaserData->Shutdown.Flags.Laser == 1)
 			break;
 		if (_kbhit())
 			break;
 	}
+	PMData->Shutdown.Status = 0xFF;
 	return 0;
 }

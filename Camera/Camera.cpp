@@ -30,7 +30,7 @@ int CameraHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
+		//Thread::Sleep(500);
 		return 1;
 	}
 }
@@ -116,18 +116,5 @@ void idle(){
 	}
 
 	display();
-	//HeartBeat Logic
-	if (CameraHeartBeat(PMData) == 0) {
-		failure = 0;
-	}
-	else {
-		failure++;
-	}
-	if (failure > 100) {
-		PMData->Shutdown.Status = 0xFF;
-	}
-	if (PMData->Shutdown.Status == 0xFF) {
-		exit(0);
-	}
 }
 
