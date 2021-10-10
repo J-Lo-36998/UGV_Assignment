@@ -30,7 +30,7 @@ int CameraHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(500);
+		//Thread::Sleep(500);
 		return 1;
 	}
 }
@@ -45,6 +45,10 @@ int main(int argc, char** argv){
 	//Define window size
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
+
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	PMData = (ProcessManagement*)PMObj.pData;
 
 	//GL Window setup
 	glutInit(&argc, (char**)(argv));
@@ -62,9 +66,7 @@ int main(int argc, char** argv){
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
 	//Instantiating Shared Memory
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	PMData = (ProcessManagement*)PMObj.pData;
+	
 	glutMainLoop();
 	return 1;
 }
@@ -124,7 +126,8 @@ void idle(){
 		failure++;
 	}
 	if (failure > 100) {
-		PMData->Shutdown.Status = 0xFF;
+		printf("IFAILED HERe");
+		//PMData->Shutdown.Status = 0xFF;
 	}
 	if (PMData->Shutdown.Status == 0xFF) {
 		exit(0);

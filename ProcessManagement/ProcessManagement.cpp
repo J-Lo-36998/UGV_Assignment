@@ -170,7 +170,7 @@ bool GpsFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
 }
 
 bool CameraFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (GpsPmHeartBeat(PMData) == 0) {
+	if (CameraPmHeartBeat(PMData) == 0) {
 		ProcessFailed[4] = 0;
 		return FALSE;
 	}
@@ -270,7 +270,7 @@ int main(){
 		}
 		if (GpsFail(PMData, ProcessFailed) == TRUE) {
 			PMData->Shutdown.Flags.GPS = 1;
-
+			
 		}
 		if (CameraFail(PMData, ProcessFailed) == TRUE) {
 			PMData->Shutdown.Flags.Camera = 1;
