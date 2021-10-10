@@ -100,13 +100,7 @@ int main() {
 			}
 		}
 
-		/*if(LaserData->Heartbeat.Flags.ProcessManagement==0){
-			failure++;
-			printf("%d", failure);
-			if (failure > 10) {
-				PMData->Shutdown.Status = 0xFF;
-			}
-		}*/
+		
 
 		if (PMData->Shutdown.Flags.Laser == 1)
 			break;
