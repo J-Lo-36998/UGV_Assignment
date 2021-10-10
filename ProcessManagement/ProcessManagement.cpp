@@ -23,6 +23,23 @@ using namespace System::Threading;
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 
+SMObject LaserObj(TEXT("Laser"), sizeof(ProcessManagement));
+ProcessManagement* LaserData = (ProcessManagement*)LaserObj.pData;
+
+SMObject DisplayObj(TEXT("Display"), sizeof(ProcessManagement));
+ProcessManagement* DisplayData = (ProcessManagement*)DisplayObj.pData;
+
+SMObject VehicleObj(TEXT("Vehicle"), sizeof(ProcessManagement));
+ProcessManagement* VehicleData = (ProcessManagement*)VehicleObj.pData;
+
+SMObject GPSObj(TEXT("GPS"), sizeof(ProcessManagement));
+ProcessManagement* GPSData = (ProcessManagement*)GPSObj.pData;
+
+SMObject CameraObj(TEXT("Camera"), sizeof(ProcessManagement));
+ProcessManagement* CameraData = (ProcessManagement*)CameraObj.pData;
+
+
+
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
 void RestartProcesses();
@@ -172,7 +189,25 @@ int main(){
 	
 	PMObj.SMCreate();
 	PMObj.SMAccess();
+
+	LaserObj.SMCreate();
+	LaserObj.SMAccess();
+	
+	DisplayObj.SMCreate();
+	DisplayObj.SMAccess();
+
+	VehicleObj.SMCreate();
+	VehicleObj.SMAccess();
+
+	GPSObj.SMCreate();
+	GPSObj.SMAccess();
+
 	PMData = (ProcessManagement*)PMObj.pData;
+	LaserData = (ProcessManagement*)LaserObj.pData;
+	DisplayData = (ProcessManagement*)DisplayObj.pData;
+	VehicleData = (ProcessManagement*)VehicleObj.pData;
+	GPSData = (ProcessManagement*)GPSObj.pData;
+	CameraData = (ProcessManagement*)CameraObj.pData;
 	//Console::ReadKey();
 	int ProcessFailed[NUM_UNITS] = {0};
 	
