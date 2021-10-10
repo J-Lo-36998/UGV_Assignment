@@ -16,20 +16,17 @@ int failure{ 0 };
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 
-SMObject LaserObj(TEXT("Laser"), sizeof(ProcessManagement));
-ProcessManagement* LaserData;
-//
-//int LaserHeartBeat(ProcessManagement* PMData) {
-//	if (PMData->Heartbeat.Flags.Laser == 0) {
-//		printf("%d", PMData->Heartbeat.Flags.Laser);
-//		PMData->Heartbeat.Flags.Laser = 1;
-//		printf("%d", PMData->Heartbeat.Flags.Laser);
-//		return 0;
-//	}
-//	else {
-//		return 1;
-//	}
-//}
+int LaserHeartBeat(ProcessManagement* PMData) {
+	if (PMData->Heartbeat.Flags.Laser == 0) {
+		printf("%d", PMData->Heartbeat.Flags.Laser);
+		PMData->Heartbeat.Flags.Laser = 1;
+		printf("%d", PMData->Heartbeat.Flags.Laser);
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
 
 int main() {
 
@@ -70,10 +67,7 @@ int main() {
 
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-	LaserObj.SMCreate();
-	LaserObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-	LaserData = (ProcessManagement*)LaserObj.pData;
 	while (1) {
 		Thread::Sleep(25);
 		//Did PM put my flag down?
@@ -83,31 +77,17 @@ int main() {
 				//
 		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
 		//PMData->Heartbeat.Flags.Laser = 0;
-		if (LaserData->Heartbeat.Flags.Laser == 0 ) {
-			printf("%d", LaserData->Heartbeat.Flags.Laser);
-			LaserData->Heartbeat.Flags.Laser = 1;
-			printf("%d", LaserData->Heartbeat.Flags.Laser);
-			
-		}
-		if (LaserData->Heartbeat.Flags.ProcessManagement == 1) {
-			LaserData->Heartbeat.Flags.ProcessManagement = 0;
+		if (LaserHeartBeat(PMData) == 0) {
 			failure = 0;
 		}
 		else {
 			failure++;
-			if (failure > 10) {
-				PMData->Shutdown.Status = 0xFF;
-			}
 		}
-
-		/*if(LaserData->Heartbeat.Flags.ProcessManagement==0){
-			failure++;
-			printf("%d", failure);
-			if (failure > 10) {
-				PMData->Shutdown.Status = 0xFF;
-			}
-		}*/
-
+		if (failure > 100) {
+			//Console::ReadKey();
+			printf("\n%d cock", failure);
+			PMData->Shutdown.Status = 0xFF;
+		}
 		if (PMData->Shutdown.Flags.Laser == 1)
 			break;
 		if (_kbhit())
