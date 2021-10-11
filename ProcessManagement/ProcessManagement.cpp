@@ -23,56 +23,43 @@ using namespace System::Threading;
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 
-SMObject LaserObj(TEXT("Laser"), sizeof(ProcessManagement));
-ProcessManagement* LaserData = (ProcessManagement*)LaserObj.pData;
-
-SMObject DisplayObj(TEXT("Display"), sizeof(ProcessManagement));
-ProcessManagement* DisplayData = (ProcessManagement*)DisplayObj.pData;
-
-SMObject VehicleObj(TEXT("Vehicle"), sizeof(ProcessManagement));
-ProcessManagement* VehicleData = (ProcessManagement*)VehicleObj.pData;
-
-SMObject GPSObj(TEXT("GPS"), sizeof(ProcessManagement));
-ProcessManagement* GPSData = (ProcessManagement*)GPSObj.pData;
-
-SMObject CameraObj(TEXT("Camera"), sizeof(ProcessManagement));
-ProcessManagement* CameraData = (ProcessManagement*)CameraObj.pData;
-
-
-
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
 void RestartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
-	TEXT("Camera.exe"),
 	TEXT("LASER.exe"),
 	TEXT("Display.exe"),
 	TEXT("Vehicle.exe"),
-	TEXT("GPS.exe")
+	TEXT("GPS.exe"),
+	TEXT("Camera.exe")
+	
 	
 };
-
+//int LaserFail, DispFail, GPSFail;
 int LaserPmHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.Laser == 1) {
+		//printf("%d", PMData->Heartbeat.Flags.Laser);
 		PMData->Heartbeat.Flags.Laser = 0;
+		//printf("%d", PMData->Heartbeat.Flags.Laser);
 		return 0;
 	}
 	else {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
 		return 1;
 	}
 }
 
 int DisplayPmHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.OpenGL == 1) {
+		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);
 		PMData->Heartbeat.Flags.OpenGL = 0;
-		
+		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);
 		return 0;
 	}
 	else {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
 		return 1;
 	}
 }
@@ -83,7 +70,7 @@ int VehiclePmHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
 		return 1;
 	}
 }
@@ -94,11 +81,10 @@ int GpsPmHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
 		return 1;
 	}
 }
-
 
 int CameraPmHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.Camera == 1) {
@@ -106,187 +92,117 @@ int CameraPmHeartBeat(ProcessManagement* PMData) {
 		return 0;
 	}
 	else {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
 		return 1;
 	}
 }
-
-bool LaserFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (LaserPmHeartBeat(PMData) == 0) {
-		ProcessFailed[0] = 0;
-		return FALSE;
-	}
-	else {
-		ProcessFailed[0]++;
-	}
-	if (ProcessFailed[0] > 10) {
-
-		return TRUE;
-	}
-	return FALSE;
-}
-
-bool DisplayFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (DisplayPmHeartBeat(PMData) == 0) {
-		ProcessFailed[1] = 0;
-		return FALSE;
-	}
-	else {
-		ProcessFailed[1]++;
-	}
-	if (ProcessFailed[1] > 10) {
-		return TRUE;
-	}
-	return FALSE;
-}
-
-bool VehicleFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (VehiclePmHeartBeat(PMData) == 0) {
-		
-		ProcessFailed[2] = 0;
-		return FALSE;
-	}
-	else {
-		ProcessFailed[2]++;
-	}
-	if (ProcessFailed[2] > 10) {
-		return TRUE;
-	}
-	return FALSE;
-}
-
-bool GpsFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (GpsPmHeartBeat(PMData) == 0) {
-		ProcessFailed[3] = 0;
-		return FALSE;
-	}
-	else {
-		ProcessFailed[3]++;
-	}
-	if (ProcessFailed[3] > 10) {
-		return TRUE;
-	}
-	return FALSE;
-}
-
-bool CameraFail(ProcessManagement* PMData, int ProcessFailed[NUM_UNITS]) {
-	if (CameraPmHeartBeat(PMData) == 0) {
-		ProcessFailed[4] = 0;
-		return FALSE;
-	}
-	else {
-		ProcessFailed[4]++;
-	}
-	if (ProcessFailed[4] > 10) {
-		return TRUE;
-	}
-	return FALSE;
-}
-
 int main(){
 	//start all 5 modules
 	StartProcesses();
 	
+	double PrevTime, NextTime;
+	__int64 Frequency{}, Counter;
+	int Shutdown = 0x00;
+	int LaserFail{ 0 };
+	int DispFail{ 0 };
+	int VFail{ 0 };
+	int GpsFail{ 0 };
+	int CamFail{ 0 };
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-
-	LaserObj.SMCreate();
-	LaserObj.SMAccess();
-	
-	DisplayObj.SMCreate();
-	DisplayObj.SMAccess();
-
-	VehicleObj.SMCreate();
-	VehicleObj.SMAccess();
-
-	GPSObj.SMCreate();
-	GPSObj.SMAccess();
-
 	PMData = (ProcessManagement*)PMObj.pData;
-	LaserData = (ProcessManagement*)LaserObj.pData;
-	DisplayData = (ProcessManagement*)DisplayObj.pData;
-	VehicleData = (ProcessManagement*)VehicleObj.pData;
-	GPSData = (ProcessManagement*)GPSObj.pData;
-	CameraData = (ProcessManagement*)CameraObj.pData;
+	
 	//Console::ReadKey();
 	int ProcessFailed[NUM_UNITS] = {0};
 	
+	//Thread::Sleep(25);
 	while (!_kbhit()) {
-		//int FailCheck = { 0 };
-		//while (FailCheck <= 3) {
-		//	ProcessFailed[0] += LaserPmHeartBeat(PMData, FailCheck);
-		//	ProcessFailed[1] += DisplayPmHeartBeat(PMData, FailCheck);
-		//	ProcessFailed[2] += VehiclePmHeartBeat(PMData, FailCheck);
-		//	ProcessFailed[3] += GpsPmHeartBeat(PMData, FailCheck);
-		//	ProcessFailed[4] += CameraPmHeartBeat(PMData, FailCheck);
-		//	////Critical Procesess
-		//	if (ProcessFailed[0] > 3) {
-		//		PMData->Shutdown.Status = 0xFF;
-		//		Console::WriteLine("Critical failure of Laser, shutting down");
-		//	}
-		//	if (ProcessFailed[0] > 3) {
-		//		Console::WriteLine("Critical failure of Display, shutting down");
-		//		PMData->Shutdown.Status = 0xFF;
-		//	}
-		//	if (ProcessFailed[2] > 3) {
-		//		Console::WriteLine("Critical failure of Vehicle, shutting down");
-		//		PMData->Shutdown.Status = 0xFF;
-		//	}
-		//	//////non-critical processes
-		//	if (ProcessFailed[3] > 3) {
-		//		Console::WriteLine("Non-critical failure of GPS, Restarting");
-		//		PMData->Shutdown.Flags.GPS = 1;
-		//		RestartProcesses();
-		//	}
-		//	if (ProcessFailed[4] > 3) {
-		//		Console::WriteLine("Non-critical failure of Camera, Restarting");
-		//		PMData->Shutdown.Flags.Camera = 1;
-		//		RestartProcesses();
-		//	}
-		//	FailCheck++;
-		//}
-		
-		/*if (LaserPmHeartBeat(PMData) == 0) {
-			printf("%d fail", ProcessFailed[0]);
-			ProcessFailed[0] = 0;
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		PrevTime = (double)Counter / (double)Frequency * 1000;
+		double TimeGap = 0;
+		while (TimeGap < 5000 && PMData->Shutdown.Status != 0xFF) {
+			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+			NextTime = (double)Counter / (double)Frequency * 1000;
+			//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
+			TimeGap = NextTime - PrevTime;
+			//printf("%d\n", PMData->Heartbeat.Flags.Laser);
+			///start
+			//Laser
+			if (LaserPmHeartBeat(PMData) == 0) {
+				LaserFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + LaserFail * 1000) {
+				printf("hi");
+				LaserFail++;
+			}
+			if (LaserFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+//			printf("%d", LaserFail);
+			//Display
+			if (DisplayPmHeartBeat(PMData) == 0) {
+				DispFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + DispFail * 1000) {
+				DispFail++;
+			}
+			if (DispFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+			//Vehicle
+			if (VehiclePmHeartBeat(PMData) == 0) {
+				VFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + VFail * 1000) {
+				VFail++;
+			}
+			if (VFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+			//GPS
+			if (GpsPmHeartBeat(PMData) == 0) {
+				GpsFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + VFail * 1000) {
+				GpsFail++;
+			}
+			if (GpsFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+			//Camera
+			if (CameraPmHeartBeat(PMData) == 0) {
+				CamFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + VFail * 1000) {
+				CamFail++;
+			}
+			if (CamFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+			//printf("%d", VFail);
+			/*LaserCheck(PMData, TimeGap, LaserFail);
+			if (LaserFail > 3) {
+				printf("HI");
+				PMData->Shutdown.Status = 0xFF;
+			}*/
 		}
-		else {
-			ProcessFailed[0]++;
-		}
-		if (ProcessFailed[0] > 100) {
+		if (PMData->Shutdown.Status == 0xFF) {
 			
-			PMData->Shutdown.Status = 0xFF;
-		}*/
-
-		if (LaserFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Laser Module");
-		}
-		if (DisplayFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Display Module");
-		}
-		if (VehicleFail(PMData, ProcessFailed) == TRUE) {
-
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Vehicle Module");
-		}
-		if (GpsFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Flags.GPS = 1;
-			printf("Failure of Non-critical Process: GPS, Restarting");
-			RestartProcesses();
-			
-		}
-		if (CameraFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Flags.Camera = 1;
-			printf("Failure of Non-critical Process: Camera, Restarting");
-			RestartProcesses();
-		}
-		/*if (PMData->Shutdown.Status == 0xFF)
-			break;*/
-		if (_kbhit())
 			break;
+		}
 	}
+	Console::ReadKey();
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
 }
@@ -357,3 +273,60 @@ void RestartProcesses()
 		}
 	}
 }
+
+
+/*else {
+				if (TimeGap > 3000) {
+					Console::ReadKey();
+					PMData->Shutdown.Status = 0xFF;
+				}
+			}*/
+			/*else if (LaserPmHeartBeat(PMData) == 1) {
+				if (TimeGap < 1000 && LaserFail == 0) {
+					LaserFail++;
+				}
+				else if (TimeGap < 2000 && LaserFail == 1) {
+					LaserFail++;
+				}
+				else if (TimeGap < 3000 && LaserFail == 2) {
+					LaserFail++;
+				}
+				if (LaserFail == 3) {
+					Console::ReadKey();
+					PMData->Shutdown.Status = 0xFF;
+				}
+			}*/
+			//printf("%d", LaserFail);
+		//}
+		//Thread::Sleep(25);	
+	//}
+
+
+			//printf("%d", timeGap);
+
+		/*if (LaserFail(PMData, ProcessFailed) == TRUE) {
+			PMData->Shutdown.Status = 0xFF;
+			printf("Critical Failure of Laser Module");
+		}
+		if (DisplayFail(PMData, ProcessFailed) == TRUE) {
+			PMData->Shutdown.Status = 0xFF;
+			printf("Critical Failure of Display Module");
+		}
+		if (VehicleFail(PMData, ProcessFailed) == TRUE) {
+
+			PMData->Shutdown.Status = 0xFF;
+			printf("Critical Failure of Vehicle Module");
+		}
+		if (GpsFail(PMData, ProcessFailed) == TRUE) {
+			PMData->Shutdown.Flags.GPS = 1;
+			printf("Failure of Non-critical Process: GPS, Restarting");
+			RestartProcesses();
+
+		}
+		if (CameraFail(PMData, ProcessFailed) == TRUE) {
+			PMData->Shutdown.Flags.Camera = 1;
+			printf("Failure of Non-critical Process: Camera, Restarting");
+			RestartProcesses();
+		}*/
+		/*if (PMData->Shutdown.Status == 0xFF)
+			break;*/

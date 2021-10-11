@@ -17,7 +17,11 @@ using namespace System::Threading;
 
 void display();
 void idle();
-int failure{ 0 };
+int pmFail{ 0 };
+
+double PrevTime, NextTime;
+__int64 Frequency{}, Counter;
+int Shutdown = 0x00;
 //Declaring Shared Memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
@@ -49,7 +53,7 @@ int main(int argc, char** argv){
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 	//GL Window setup
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -118,16 +122,28 @@ void idle(){
 	}
 
 	display();
-	//HeartBeat Logic
-	if (CameraHeartBeat(PMData) == 0) {
-		failure = 0;
-	}
-	else {
-		failure++;
-	}
-	if (failure > 100) {
-		printf("IFAILED HERe");
-		//PMData->Shutdown.Status = 0xFF;
+	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+	PrevTime = (double)Counter / (double)Frequency * 1000;
+	double TimeGap = 0;
+	//printf("Hiii");
+	while (TimeGap <= 5000 && PMData->Shutdown.Status != 0xFF) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		NextTime = (double)Counter / (double)Frequency * 1000;
+		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
+		TimeGap = NextTime - PrevTime;
+		//PMData->Heartbeat.Flags.Laser = 0;
+		if (CameraHeartBeat(PMData) == 0) {
+			pmFail = 0;
+			break;
+		}
+		else if (TimeGap > 1000 + pmFail * 1000) {
+			pmFail++;
+			//printf("%d\n", pmFail);
+		}
+		if (pmFail > 3) {
+			PMData->Shutdown.Status = 0xFF;
+			break;
+		}
 	}
 	if (PMData->Shutdown.Status == 0xFF) {
 		exit(0);

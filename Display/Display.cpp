@@ -74,7 +74,12 @@ Vehicle * vehicle = NULL;
 double speed = 0;
 double steering = 0;
 int setup = 0;
-int failure{ 0 };
+int pmFail{ 0 };
+
+double PrevTime, NextTime;
+__int64 Frequency{}, Counter;
+int Shutdown = 0x00;
+
 
 //Declaring Shared memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
@@ -82,6 +87,7 @@ ProcessManagement* PMData;
 
 int DisplayHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
+		pmFail = 0;
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
 		PMData->Heartbeat.Flags.OpenGL = 1;
 		printf("%d", PMData->Heartbeat.Flags.OpenGL);
@@ -99,7 +105,7 @@ int main(int argc, char ** argv) {
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -148,8 +154,9 @@ void display() {
 	//  This method is the main draw routine. 
 	// -------------------------------------------------------------------------
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -172,8 +179,10 @@ void display() {
 	}
 	// draw HUD
 	HUD::Draw();
-
+	
 	glutSwapBuffers();
+	
+	
 };
 
 void reshape(int width, int height) {
@@ -204,7 +213,7 @@ double getTime()
 }
 
 void idle() {
-
+	
 	if (KeyManager::get()->isAsciiKeyPressed('a')) {
 		Camera::get()->strafeLeft();
 	}
@@ -256,24 +265,37 @@ void idle() {
 	previousTime = currTime;
 	
 	display();
-	
+	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+	PrevTime = (double)Counter / (double)Frequency * 1000;
+	double TimeGap = 0;
+	//printf("Hiii");
+	while (TimeGap <= 5000 && PMData->Shutdown.Status != 0xFF) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		NextTime = (double)Counter / (double)Frequency * 1000;
+		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
+		TimeGap = NextTime - PrevTime;
+		//PMData->Heartbeat.Flags.Laser = 0;
+		if (DisplayHeartBeat(PMData) == 0) {
+			pmFail = 0;
+			break;
+		}
+		else if (TimeGap > 1000 + pmFail * 1000) {
+			pmFail++;
+			//printf("%d\n", pmFail);
+		}
+		if (pmFail > 3) {
+			PMData->Shutdown.Status = 0xFF;
+			break;
+		}
+	}
 	// do a simulation step
 	if (vehicle != NULL) {
 		vehicle->update(speed, steering, elapsedTime);
 	}
-	//HeartBeat Logic
-	if (DisplayHeartBeat(PMData) == 0){
-		failure = 0;
-	}
-	else {
-		failure++;
-	}
-	if (failure > 100) {
-		//Console::ReadKey();
-		PMData->Shutdown.Status = 0xFF;
-	}
+	
 #ifdef _WIN32 
 	Sleep(sleep_time_between_frames_in_seconds * 1000);
+	
 #else
 	usleep(sleep_time_between_frames_in_seconds * 1e6);
 #endif

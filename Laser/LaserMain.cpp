@@ -3,21 +3,59 @@
 #using <System.dll>
 #include <SMObject.h>
 #include <smstructs.h>
-#include <array>
-#include "UGV_module.h"
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-using namespace Net;
-using namespace Sockets;
-using namespace Text;
-int failure{ 0 };
+int counter{ 0 };
+int pmFail{ 0 };
+int LaserHeartBeat(ProcessManagement* PMData);
 
-SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-ProcessManagement* PMData;
+int main() {
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+
+	double PrevTime, NextTime;
+	__int64 Frequency{}, Counter;
+	int Shutdown = 0x00;
+
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+
+	while (1) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		PrevTime = (double)Counter / (double)Frequency * 1000;
+		double TimeGap = 0;
+		//printf("Hiii");
+		while (TimeGap <= 4000 && PMData->Shutdown.Status!= 0xFF) {
+			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+			NextTime = (double)Counter / (double)Frequency * 1000;
+			//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
+			TimeGap = NextTime - PrevTime;
+			//PMData->Heartbeat.Flags.Laser = 0;
+			if (LaserHeartBeat(PMData) == 0) {
+				pmFail = 0;
+				break;
+			}
+			else if(TimeGap > 1000 + pmFail*1000){
+				pmFail++;
+			}
+			if (pmFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+		}
+		if (PMData->Shutdown.Status == 0xFF) {
+			break;
+		}
+	}
+	PMData->Shutdown.Status = 0xFF;
+	return 0;
+}
 
 int LaserHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.Laser == 0) {
+		pmFail = 0;
 		printf("%d", PMData->Heartbeat.Flags.Laser);
 		PMData->Heartbeat.Flags.Laser = 1;
 		printf("%d", PMData->Heartbeat.Flags.Laser);
@@ -26,72 +64,4 @@ int LaserHeartBeat(ProcessManagement* PMData) {
 	else {
 		return 1;
 	}
-}
-
-int main() {
-
-	//Tcp client delcaration and initialisation
-	//TcpClient^ Client;
-	//int PortNumber = 23000;
-	//Client = gcnew TcpClient("192.168.1.200", PortNumber);
-	//Client->NoDelay = TRUE;
-	//Client->ReceiveTimeout = 500;
-	//Client->SendTimeout = 500;
-	//Client->ReceiveBufferSize = 1024;
-	//Client->SendBufferSize = 1024;
-	//array<unsigned char>^ SendData;
-	//SendData = gcnew array<unsigned char>(1024);
-
-	//SM_VehicleControl Data;
-
-	//String^ Message;
-	////Sending Data
-	//Message = gcnew String("#");
-	//Message = Message + Data.Steering.ToString("F3") + " " + Data.Speed.ToString("F3") + "1 #";
-	//
-	//SendData = Encoding::ASCII->GetBytes(Message);
-
-
-	////Send to Server
-	//SM_Laser LaserData;
-	//unsigned char* BytePtr;
-	//BytePtr = (unsigned char*)(&LaserData);
-	//for (int i{ 0 }; i < sizeof(SM_Laser); i++) {
-	//	SendData[i] = *(BytePtr + i);
-	//}
-	//NetworkStream^ Stream = Client->GetStream();
-	//Stream->Write(SendData, 0, SendData->Length);
-
-	//Shared memory Declaration and initialisation
-	
-
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	PMData = (ProcessManagement*)PMObj.pData;
-	while (1) {
-		Thread::Sleep(25);
-		//Did PM put my flag down?
-			//true-> put flag up
-			//false-> is the pm time stamp older by agreed time gap
-				//True->shutdown all
-				//
-		//Console::WriteLine("Laser time stamps: {0,12:F3} {1, 12:X2}", TimeStamp, Shutdown);
-		//PMData->Heartbeat.Flags.Laser = 0;
-		if (LaserHeartBeat(PMData) == 0) {
-			failure = 0;
-		}
-		else {
-			failure++;
-		}
-		if (failure > 100) {
-			//Console::ReadKey();
-			printf("\n%d cock", failure);
-			PMData->Shutdown.Status = 0xFF;
-		}
-		if (PMData->Shutdown.Flags.Laser == 1)
-			break;
-		if (_kbhit())
-			break;
-	}
-	return 0;
 }

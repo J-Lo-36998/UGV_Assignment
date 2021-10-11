@@ -1,4 +1,3 @@
-#include "GPS.h"
 #include <conio.h>
 #include <Windows.h>
 #using <System.dll>
@@ -7,52 +6,62 @@
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Threading;
+int counter{ 0 };
+int pmFail{ 0 };
+int GPSHeartBeat(ProcessManagement* PMData);
 
-int failure{ 0 };
+int main() {
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 
-SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-ProcessManagement* PMData;
+	double PrevTime, NextTime;
+	__int64 Frequency{}, Counter;
+	int Shutdown = 0x00;
+
+	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+
+	while (1) {
+		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+		PrevTime = (double)Counter / (double)Frequency * 1000;
+		double TimeGap = 0;
+		//printf("Hiii");
+		while (TimeGap <= 4000 && PMData->Shutdown.Status != 0xFF) {
+			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+			NextTime = (double)Counter / (double)Frequency * 1000;
+			//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
+			TimeGap = NextTime - PrevTime;
+			//PMData->Heartbeat.Flags.Laser = 0;
+			if (GPSHeartBeat(PMData) == 0) {
+				pmFail = 0;
+				break;
+			}
+			else if (TimeGap > 1000 + pmFail * 1000) {
+				pmFail++;
+			}
+			if (pmFail > 3) {
+				PMData->Shutdown.Status = 0xFF;
+				break;
+			}
+		}
+		if (PMData->Shutdown.Status == 0xFF) {
+			break;
+		}
+	}
+	PMData->Shutdown.Status = 0xFF;
+	return 0;
+}
 
 int GPSHeartBeat(ProcessManagement* PMData) {
-	if (PMData->Heartbeat.Flags.GPS == 0) {
+	if (PMData->Heartbeat.Flags.Laser == 0) {
+		pmFail = 0;
 		printf("%d", PMData->Heartbeat.Flags.GPS);
-		PMData->Heartbeat.Flags.GPS = 1;
+		PMData->Heartbeat.Flags.Laser = 1;
 		printf("%d", PMData->Heartbeat.Flags.GPS);
 		return 0;
 	}
 	else {
 		return 1;
 	}
-}
-
-int main() {
-
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	PMData = (ProcessManagement*)PMObj.pData;
-	while (1) {
-
-		Thread::Sleep(25);
-		//Did PM put my flag down?
-			//true-> put flag up
-			//false-> is the pm time stamp older by agreed time gap
-				//True->shutdown all
-				//
-		//PMData->Heartbeat.Flags.GPS = 0;
-		if (GPSHeartBeat(PMData) == 0) {
-			failure = 0;
-		}
-		else {
-			failure++;
-		}
-		if (failure > 100) {
-			//Console::ReadKey();
-			PMData->Shutdown.Status = 0xFF;
-		}
-		if (PMData->Shutdown.Flags.GPS == 1)
-			break;
-		if (_kbhit())
-			break;
-	}
-	return 0;
 }
