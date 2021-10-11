@@ -29,9 +29,9 @@ int LaserHeartBeat(ProcessManagement* PMData) {
 	if (PMData->Heartbeat.Flags.Laser == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.Laser); //Printing prev value of hb (what PM changed it to)
+		//printf("%d\n", PMData->Heartbeat.Flags.Laser); //Printing prev value of hb (for checking what PM changed it to) 
 		PMData->Heartbeat.Flags.Laser = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.Laser);//Printing new Value of hb flag
+		//printf("%d\n", PMData->Heartbeat.Flags.Laser);//Printing new Value of hb flag (For Checking)
 		return 0;//return zero if PM still alive
 	}
 	else {
@@ -91,7 +91,7 @@ int main() {
 	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	// Print the received string on the screen
 	Console::WriteLine(ResponseData);
-	Console::ReadKey();
+	//Console::ReadKey();
 
 	SendData = System::Text::Encoding::ASCII->GetBytes(AskScan);
 
@@ -160,7 +160,7 @@ int main() {
 	Stream->Close();
 	Client->Close();
 
-	Console::ReadKey();
+	//Console::ReadKey();
 	Console::ReadKey();
 
 	PMData->Shutdown.Status = 0xFF;
