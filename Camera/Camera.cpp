@@ -17,25 +17,28 @@ using namespace System::Threading;
 
 void display();
 void idle();
+//PM failure counter
 int pmFail{ 0 };
-
+//For Timestamp use
 double PrevTime, NextTime;
 __int64 Frequency{}, Counter;
 int Shutdown = 0x00;
 //Declaring Shared Memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
-
+//for convertion to ms
+#define MILSEC 1000
 int CameraHeartBeat(ProcessManagement* PMData) {
+	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.Camera == 0) {
-		printf("%d", PMData->Heartbeat.Flags.Camera);
+		//if pm not dead pmFail variable is reset
+		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing prev value of hb (what PM changed it to)
 		PMData->Heartbeat.Flags.Camera = 1;
-		printf("%d", PMData->Heartbeat.Flags.Camera);
-		return 0;
+		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing new Value of hb flag
+		return 0;//return zero if PM still alive
 	}
 	else {
-		//Thread::Sleep(500);
-		return 1;
+		return 1;//if Pm dead, return 1
 	}
 }
 
@@ -49,11 +52,11 @@ int main(int argc, char** argv){
 	//Define window size
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
-
+	//Instantiating Shared Memory
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+
 	//GL Window setup
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -122,13 +125,15 @@ void idle(){
 	}
 
 	display();
+	//Instantiating old time stamp and the declaring time gap (so it restes after every loop)
 	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-	PrevTime = (double)Counter / (double)Frequency * 1000;
+	PrevTime = (double)Counter / (double)Frequency * MILSEC;
 	double TimeGap = 0;
 	//printf("Hiii");
 	while (TimeGap <= 5000 && PMData->Shutdown.Status != 0xFF) {
+		//Instantiating next time stamp/reset once gets past 4000ms
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		NextTime = (double)Counter / (double)Frequency * 1000;
+		NextTime = (double)Counter / (double)Frequency * MILSEC;
 		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
 		TimeGap = NextTime - PrevTime;
 		//PMData->Heartbeat.Flags.Laser = 0;
@@ -136,13 +141,17 @@ void idle(){
 			pmFail = 0;
 			break;
 		}
+		//If PM is dead come in here and increment pmFail and check at another time stamp
 		else if (TimeGap > 1000 + pmFail * 1000) {
-			pmFail++;
-			//printf("%d\n", pmFail);
+			pmFail++;//PM possibly dead increment
 		}
 		if (pmFail > 3) {
+			Console::WriteLine("Process Mangement Failure, Critical\n");
 			PMData->Shutdown.Status = 0xFF;
 			break;
+		}
+		else {
+			//Do nothing
 		}
 	}
 	if (PMData->Shutdown.Status == 0xFF) {

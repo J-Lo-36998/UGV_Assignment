@@ -6,45 +6,67 @@
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-int counter{ 0 };
+
+//Counter to keep track of how many times PM Fails
 int pmFail{ 0 };
-int GPSHeartBeat(ProcessManagement* PMData);
+
+//For use with Time Stamps
+double Prev, Next;
+__int64 Frequency{}, Counter;
+int Shutdown = 0x00;
+//for convertion to ms
+#define MILSEC 1000
+//Declaring Shared memory
+SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+int GpsHeartBeat(ProcessManagement* PMData) {
+	//PM is not dead if value of hb Flag reset to zero
+	if (PMData->Heartbeat.Flags.GPS == 0) {
+		//if pm not dead pmFail variable is reset
+		pmFail = 0;
+		printf("%d\n", PMData->Heartbeat.Flags.GPS); //Printing prev value of hb (what PM changed it to)
+		PMData->Heartbeat.Flags.GPS = 1;
+		printf("%d\n", PMData->Heartbeat.Flags.GPS);//Printing new Value of hb flag
+		return 0;//return zero if PM still alive
+	}
+	else {
+		//if Pm dead, return 1
+		return 1;
+	}
+}
 
 int main() {
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-
-	double PrevTime, NextTime;
-	__int64 Frequency{}, Counter;
-	int Shutdown = 0x00;
-
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
+	//Instantiating Sharedmemory (Creating and allowing access)
 	PMObj.SMCreate();
 	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-
-	while (1) {
+	PMData = (ProcessManagement*)PMObj.pData;
+	while (PMData->Shutdown.Status != 0xFF) {
+		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		PrevTime = (double)Counter / (double)Frequency * 1000;
+		Prev = (double)Counter / (double)Frequency * MILSEC;
 		double TimeGap = 0;
-		//printf("Hiii");
 		while (TimeGap <= 4000 && PMData->Shutdown.Status != 0xFF) {
+			//Instantiating next time stamp/reset once gets past 4000ms
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-			NextTime = (double)Counter / (double)Frequency * 1000;
-			//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
-			TimeGap = NextTime - PrevTime;
-			//PMData->Heartbeat.Flags.Laser = 0;
-			if (GPSHeartBeat(PMData) == 0) {
+			Next = (double)Counter / (double)Frequency * MILSEC;
+			TimeGap = Next - Prev;//To obtain time gap between times
+			if (GpsHeartBeat(PMData) == 0) {
+				//Reset value of pmFail if PM still Alive
 				pmFail = 0;
 				break;
 			}
+			//If PM is dead come in here and increment pmFail and check at another time stamp
 			else if (TimeGap > 1000 + pmFail * 1000) {
 				pmFail++;
 			}
+			//PM Shutdown (Since PM is critical, shutdown all)
 			if (pmFail > 3) {
+				Console::WriteLine("Process Mangement Failure, Critical\n");
 				PMData->Shutdown.Status = 0xFF;
 				break;
 			}
 		}
+		//on shutdown signal exit and close window
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;
 		}
@@ -53,15 +75,3 @@ int main() {
 	return 0;
 }
 
-int GPSHeartBeat(ProcessManagement* PMData) {
-	if (PMData->Heartbeat.Flags.Laser == 0) {
-		pmFail = 0;
-		printf("%d", PMData->Heartbeat.Flags.GPS);
-		PMData->Heartbeat.Flags.Laser = 1;
-		printf("%d", PMData->Heartbeat.Flags.GPS);
-		return 0;
-	}
-	else {
-		return 1;
-	}
-}

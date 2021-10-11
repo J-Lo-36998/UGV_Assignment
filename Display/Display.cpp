@@ -74,28 +74,30 @@ Vehicle * vehicle = NULL;
 double speed = 0;
 double steering = 0;
 int setup = 0;
+//PM fail counter
 int pmFail{ 0 };
-
-double PrevTime, NextTime;
+//For using time stamps
+double Prev, Next;
 __int64 Frequency{}, Counter;
 int Shutdown = 0x00;
-
-
+//for convertion to ms
+#define MILSEC 1000
 //Declaring Shared memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 
 int DisplayHeartBeat(ProcessManagement* PMData) {
+	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
+		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		printf("%d", PMData->Heartbeat.Flags.OpenGL);
+		printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing prev value of hb (what PM changed it to)
 		PMData->Heartbeat.Flags.OpenGL = 1;
-		printf("%d", PMData->Heartbeat.Flags.OpenGL);
-		return 0;
+		printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing new Value of hb flag
+		return 0;//return zero if PM still alive
 	}
 	else {
-		//Thread::Sleep(500);
-		return 1;
+		return 1;//if Pm dead, return 1
 	}
 }
 //int _tmain(int argc, _TCHAR* argv[]) {
@@ -105,7 +107,6 @@ int main(int argc, char ** argv) {
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -181,8 +182,6 @@ void display() {
 	HUD::Draw();
 	
 	glutSwapBuffers();
-	
-	
 };
 
 void reshape(int width, int height) {
@@ -265,27 +264,30 @@ void idle() {
 	previousTime = currTime;
 	
 	display();
-	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-	PrevTime = (double)Counter / (double)Frequency * 1000;
+	//Instantiating old time stamp and the declaring time gap (so it restes after every loop)
 	double TimeGap = 0;
-	//printf("Hiii");
+	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
+	Prev = (double)Counter / (double)Frequency * MILSEC;
 	while (TimeGap <= 5000 && PMData->Shutdown.Status != 0xFF) {
+		//Instantiating next time stamp/reset once gets past 4000ms
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		NextTime = (double)Counter / (double)Frequency * 1000;
-		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
-		TimeGap = NextTime - PrevTime;
-		//PMData->Heartbeat.Flags.Laser = 0;
+		Next = (double)Counter / (double)Frequency * MILSEC;
+		TimeGap = Next - Prev;//getting the time gap
 		if (DisplayHeartBeat(PMData) == 0) {
 			pmFail = 0;
 			break;
 		}
+		//If PM is dead come in here and increment pmFail and check at another time stamp
 		else if (TimeGap > 1000 + pmFail * 1000) {
-			pmFail++;
-			//printf("%d\n", pmFail);
+			pmFail++;//PM possibly dead increment
 		}
-		if (pmFail > 3) {
+		if (pmFail > 3) {//PM is Dead, shutdown as critical
+			Console::WriteLine("Process Mangement Failure, Critical\n");
 			PMData->Shutdown.Status = 0xFF;
 			break;
+		}
+		else {
+			//Do nothing
 		}
 	}
 	// do a simulation step
@@ -299,6 +301,7 @@ void idle() {
 #else
 	usleep(sleep_time_between_frames_in_seconds * 1e6);
 #endif
+	//exit display.exe with shutdown signal
 	if (PMData->Shutdown.Status == 0xFF) {
 		exit(0);
 	}
