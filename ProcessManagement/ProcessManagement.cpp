@@ -21,7 +21,8 @@ using namespace System::Threading;
 #define NUM_UNITS 5
 //for convertion to ms
 #define MILSEC 1000
-
+//Time in ms in the loops and also when to check again
+#define WAIT_TIME 1000
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 
@@ -123,7 +124,7 @@ int main(){
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		PrevTime = (double)Counter / (double)Frequency * MILSEC;
 		double TimeGap = 0;
-		while (TimeGap < 5000 && PMData->Shutdown.Status != 0xFF) {
+		while (TimeGap < 5 * WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 			NextTime = (double)Counter / (double)Frequency * MILSEC;
 			TimeGap = NextTime - PrevTime;
@@ -132,7 +133,7 @@ int main(){
 				LaserFail = 0;
 				break;
 			}
-			else if (TimeGap > 1000 + LaserFail * 1000) {
+			else if (TimeGap > WAIT_TIME + LaserFail * WAIT_TIME) {
 				LaserFail++;
 			}
 			if (LaserFail > 3) {
@@ -145,7 +146,7 @@ int main(){
 				DispFail = 0;
 				break;
 			}
-			else if (TimeGap > 1000 + DispFail * 1000) {
+			else if (TimeGap > WAIT_TIME + DispFail * WAIT_TIME) {
 				DispFail++;
 			}
 			if (DispFail > 3) {
@@ -158,7 +159,7 @@ int main(){
 				VFail = 0;
 				break;
 			}
-			else if (TimeGap > 1000 + VFail * 1000) {
+			else if (TimeGap > WAIT_TIME + VFail * WAIT_TIME) {
 				VFail++;
 			}
 			if (VFail > 3) {
@@ -171,7 +172,7 @@ int main(){
 				GpsFail = 0;
 				break;
 			}
-			else if (TimeGap > 1000 + VFail * 1000) {
+			else if (TimeGap > WAIT_TIME + VFail * WAIT_TIME) {
 				GpsFail++;
 			}
 			if (GpsFail > 3) {
@@ -185,7 +186,7 @@ int main(){
 				CamFail = 0;
 				break;
 			}
-			else if (TimeGap > 1000 + VFail * 1000) {
+			else if (TimeGap > WAIT_TIME + VFail * WAIT_TIME) {
 				CamFail++;
 			}
 			if (CamFail > 3) {

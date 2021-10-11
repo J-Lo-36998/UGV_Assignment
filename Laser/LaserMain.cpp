@@ -20,6 +20,8 @@ __int64 Frequency{}, Counter;
 int Shutdown = 0x00;
 //for convertion to ms
 #define MILSEC 1000
+//Time in ms in the loops and also when to check again
+#define WAIT_TIME 1000
 //Declaring Shared memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
@@ -131,7 +133,7 @@ int main() {
 			printf("Y direction: %f\n", RangeY[i]);
 		}
 		//For HeartBeats
-		while (TimeGap <= 4000 && PMData->Shutdown.Status!= 0xFF) {
+		while (TimeGap <= 4 * WAIT_TIME && PMData->Shutdown.Status!= 0xFF) {
 			//Instantiating next time stamp/reset once gets past 4000ms
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 			Next = (double)Counter / (double)Frequency * MILSEC;
@@ -142,7 +144,7 @@ int main() {
 				break;
 			}
 			//If PM is dead come in here and increment pmFail and check at another time stamp
-			else if(TimeGap > 1000 + pmFail*1000){
+			else if(TimeGap > WAIT_TIME + pmFail* WAIT_TIME){
 				pmFail++;
 			}
 			//PM Shutdown (Since PM is critical, shutdown all)

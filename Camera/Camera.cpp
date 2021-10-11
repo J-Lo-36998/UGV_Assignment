@@ -28,6 +28,8 @@ SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 //for convertion to ms
 #define MILSEC 1000
+//Time in ms in the loops and also when to check again
+#define WAIT_TIME 1000
 int CameraHeartBeat(ProcessManagement* PMData) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.Camera == 0) {
@@ -130,7 +132,7 @@ void idle(){
 	PrevTime = (double)Counter / (double)Frequency * MILSEC;
 	double TimeGap = 0;
 	//printf("Hiii");
-	while (TimeGap <= 5000 && PMData->Shutdown.Status != 0xFF) {
+	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 		//Instantiating next time stamp/reset once gets past 4000ms
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		NextTime = (double)Counter / (double)Frequency * MILSEC;
@@ -142,7 +144,7 @@ void idle(){
 			break;
 		}
 		//If PM is dead come in here and increment pmFail and check at another time stamp
-		else if (TimeGap > 1000 + pmFail * 1000) {
+		else if (TimeGap > WAIT_TIME + pmFail * WAIT_TIME) {
 			pmFail++;//PM possibly dead increment
 		}
 		if (pmFail > 3) {
