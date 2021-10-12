@@ -163,7 +163,7 @@ int main() {
 	Client->Close();
 
 	//Console::ReadKey();
-	Console::ReadKey();
+	//Console::ReadKey();
 
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
