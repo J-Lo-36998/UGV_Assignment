@@ -22,7 +22,11 @@ public:
 
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
-
+	ProcessManagement* PMData;
+	array<unsigned char>^ SendData;
+	array<unsigned char>^ ReadData;
+	String^ ResponseData;
+	NetworkStream^ Stream;
 };
 
 
