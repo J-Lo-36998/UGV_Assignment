@@ -93,9 +93,9 @@ int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing prev value of hb (what PM changed it to)
+		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing prev value of hb (what PM changed it to)
 		PMData->Heartbeat.Flags.OpenGL = 1;
-		printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing new Value of hb flag
+		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing new Value of hb flag
 		return 0;//return zero if PM still alive
 	}
 	else {

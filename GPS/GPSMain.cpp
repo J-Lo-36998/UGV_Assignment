@@ -25,9 +25,9 @@ int GpsHeartBeat(ProcessManagement* PMData, int& pmFail) {
 	if (PMData->Heartbeat.Flags.GPS == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.GPS); //Printing prev value of hb (what PM changed it to)
+		//printf("%d\n", PMData->Heartbeat.Flags.GPS); //Printing prev value of hb (what PM changed it to)
 		PMData->Heartbeat.Flags.GPS = 1;
-		printf("%d\n", PMData->Heartbeat.Flags.GPS);//Printing new Value of hb flag
+		//printf("%d\n", PMData->Heartbeat.Flags.GPS);//Printing new Value of hb flag
 		return 0;//return zero if PM still alive
 	}
 	else {

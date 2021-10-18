@@ -35,9 +35,9 @@ int CameraHeartBeat(ProcessManagement* PMData, int& pmFail) {
 	if (PMData->Heartbeat.Flags.Camera == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing prev value of hb (for checking what PM changed it to)
+		//printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing prev value of hb (for checking what PM changed it to)
 		PMData->Heartbeat.Flags.Camera = 1;
-		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing new Value of hb flag(For CHecking)
+		//printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing new Value of hb flag(For CHecking)
 		return 0;//return zero if PM still alive
 	}
 	else {
