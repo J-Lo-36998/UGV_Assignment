@@ -18,6 +18,7 @@ public:
 	int sendDataToSharedMemory() override;
 	bool getShutdownFlag() override;
 	int setHeartbeat(bool heartbeat) override;
+	int disconnect() override;
 	~Laser();
 
 protected:

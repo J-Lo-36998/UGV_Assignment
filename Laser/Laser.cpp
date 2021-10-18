@@ -8,8 +8,6 @@ int Laser::connect(String^ hostName, int portNumber)
 	// Pointer to TcpClent type object on managed heap
 	TcpClient^ Client;
 	// arrays of unsigned chars to send and receive data
-	array<unsigned char>^ SendData;
-	array<unsigned char>^ ReadData;
 	// String command to ask for Channel 1 analogue voltage from the PLC
 	// These command are available on Galil RIO47122 command reference manual
 	// available online
@@ -25,6 +23,8 @@ int Laser::connect(String^ hostName, int portNumber)
 	Client->SendTimeout = 500;//ms
 	Client->ReceiveBufferSize = 1024;
 	Client->SendBufferSize = 1024;
+	//declaring stream
+	Stream = Client->GetStream();
 	// unsigned char arrays of 16 bytes each are created on managed heap
 	SendData = gcnew array<unsigned char>(16);
 	ReadData = gcnew array<unsigned char>(2500);
@@ -102,6 +102,11 @@ bool Laser::getShutdownFlag()
 int Laser::setHeartbeat(bool heartbeat)
 {
 	// YOUR CODE HERE
+	return 1;
+}
+int Laser::disconnect() {
+	Stream->Close();
+	Client->Close();
 	return 1;
 }
 Laser::~Laser()

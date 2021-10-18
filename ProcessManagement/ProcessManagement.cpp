@@ -138,7 +138,7 @@ void VehicleFailure(ProcessManagement* PMData, int& VFail) {
 		//break;
 	}
 	else if (VFail > 500) {
-		Console::Write("Critical Failure of Display module: Shutting Down\n");
+		Console::Write("Critical Failure of Vehicle module: Shutting Down\n");
 		PMData->Shutdown.Status = 0xFF;
 		//break;
 	}
