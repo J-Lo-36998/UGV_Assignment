@@ -20,14 +20,14 @@ int Shutdown = 0x00;
 //Declaring Shared memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-int GpsHeartBeat(ProcessManagement* PMData, int &pmFail) {
+int GpsHeartBeat(ProcessManagement* PMData, int& pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.GPS == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		//printf("%d\n", PMData->Heartbeat.Flags.GPS); //Printing prev value of hb (what PM changed it to)
+		printf("%d\n", PMData->Heartbeat.Flags.GPS); //Printing prev value of hb (what PM changed it to)
 		PMData->Heartbeat.Flags.GPS = 1;
-		//printf("%d\n", PMData->Heartbeat.Flags.GPS);//Printing new Value of hb flag
+		printf("%d\n", PMData->Heartbeat.Flags.GPS);//Printing new Value of hb flag
 		return 0;//return zero if PM still alive
 	}
 	else {
@@ -36,7 +36,7 @@ int GpsHeartBeat(ProcessManagement* PMData, int &pmFail) {
 		pmFail++;
 		return 1;
 	}
-	
+
 }
 
 int main() {
@@ -44,14 +44,14 @@ int main() {
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
-	
-	
+
+
 	while (PMData->Shutdown.Status != 0xFF) {
 		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		Prev = (double)Counter / (double)Frequency * MILSEC;
 		double TimeGap = 0;
-		printf("%d\n", PMData->Heartbeat.Flags.GPS);
+		//printf("%d\n", PMData->Heartbeat.Flags.GPS);
 		while (TimeGap <= 5 * WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 			//Instantiating next time stamp/reset once gets past 4000ms
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
@@ -72,7 +72,8 @@ int main() {
 				//Do nothing
 			}
 		}
-		printf("%d\n", PMData->Heartbeat.Flags.GPS);
+		//printf("%d\n", PMData->Heartbeat.Flags.GPS);
+		Thread::Sleep(10);
 		//on shutdown signal exit and close window
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;

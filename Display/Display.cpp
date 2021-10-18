@@ -291,6 +291,7 @@ void idle() {
 			//Do nothing
 		}
 	}
+	Thread::Sleep(10);
 	// do a simulation step
 	if (vehicle != NULL) {
 		vehicle->update(speed, steering, elapsedTime);

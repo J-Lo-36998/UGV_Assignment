@@ -31,9 +31,9 @@ int LaserHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	if (PMData->Heartbeat.Flags.Laser == 0) {
 		//if pm not dead pmFail variable is reset
 		pmFail = 0;
-		//printf("%d\n", PMData->Heartbeat.Flags.Laser); //Printing prev value of hb (for checking what PM changed it to) 
+		printf("%d\n", PMData->Heartbeat.Flags.Laser); //Printing prev value of hb (for checking what PM changed it to) 
 		PMData->Heartbeat.Flags.Laser = 1;
-		//printf("%d\n", PMData->Heartbeat.Flags.Laser);//Printing new Value of hb flag (For Checking)
+		printf("%d\n", PMData->Heartbeat.Flags.Laser);//Printing new Value of hb flag (For Checking)
 		return 0;//return zero if PM still alive
 	}
 	else {
@@ -134,7 +134,7 @@ int main() {
 		//	printf("Y direction: %f\n", RangeY[i]);
 		//}
 		//For HeartBeats
-		printf("%d\n", PMData->Heartbeat.Flags.Laser);
+		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		while (TimeGap <= 4000 && PMData->Shutdown.Status!= 0xFF) {
 			//Instantiating next time stamp/reset once gets past 4000ms
 			
@@ -156,7 +156,8 @@ int main() {
 			}
 		}
 		//on shutdown signal exit and close window
-		printf("%d\n", PMData->Heartbeat.Flags.Laser);
+		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
+		Thread::Sleep(10);
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;
 		}
