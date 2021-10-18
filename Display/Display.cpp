@@ -88,7 +88,7 @@ int Shutdown = 0x00;
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 
-int DisplayHeartBeat(ProcessManagement* PMData) {
+int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
 		//if pm not dead pmFail variable is reset
@@ -99,6 +99,7 @@ int DisplayHeartBeat(ProcessManagement* PMData) {
 		return 0;//return zero if PM still alive
 	}
 	else {
+		pmFail++;
 		return 1;//if Pm dead, return 1
 	}
 }
@@ -275,18 +276,16 @@ void idle() {
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		Next = (double)Counter / (double)Frequency * MILSEC;
 		TimeGap = Next - Prev;//getting the time gap
-		if (DisplayHeartBeat(PMData) == 0) {
+		if (DisplayHeartBeat(PMData, pmFail) == 0) {
 			pmFail = 0;
 			break;
 		}
 		//If PM is dead come in here and increment pmFail and check at another time stamp
-		else if (TimeGap > WAIT_TIME + pmFail * WAIT_TIME) {
-			pmFail++;//PM possibly dead increment
-		}
-		if (pmFail > 3) {//PM is Dead, shutdown as critical
+		
+		else if (pmFail > 500) {//PM is Dead, shutdown as critical
 			Console::WriteLine("Process Mangement Failure, Critical\n");
+			Thread::Sleep(1000);
 			PMData->Shutdown.Status = 0xFF;
-			break;
 		}
 		else {
 			//Do nothing

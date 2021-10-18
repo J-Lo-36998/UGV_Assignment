@@ -30,16 +30,18 @@ ProcessManagement* PMData;
 #define MILSEC 1000
 //Time in ms in the loops and also when to check again
 #define WAIT_TIME 1000
-int CameraHeartBeat(ProcessManagement* PMData) {
+int CameraHeartBeat(ProcessManagement* PMData, int& pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.Camera == 0) {
 		//if pm not dead pmFail variable is reset
-		//printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing prev value of hb (for checking what PM changed it to)
+		pmFail = 0;
+		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing prev value of hb (for checking what PM changed it to)
 		PMData->Heartbeat.Flags.Camera = 1;
-		//printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing new Value of hb flag(For CHecking)
+		printf("%d\n", PMData->Heartbeat.Flags.Camera);//Printing new Value of hb flag(For CHecking)
 		return 0;//return zero if PM still alive
 	}
 	else {
+		pmFail++;
 		return 1;//if Pm dead, return 1
 	}
 }
@@ -139,18 +141,15 @@ void idle(){
 		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
 		TimeGap = NextTime - PrevTime;
 		//PMData->Heartbeat.Flags.Laser = 0;
-		if (CameraHeartBeat(PMData) == 0) {
+		if (CameraHeartBeat(PMData, pmFail) == 0) {
 			pmFail = 0;
 			break;
 		}
 		//If PM is dead come in here and increment pmFail and check at another time stamp
-		else if (TimeGap > WAIT_TIME + pmFail * WAIT_TIME) {
-			pmFail++;//PM possibly dead increment
-		}
-		if (pmFail > 3) {
-			Console::WriteLine("Process Mangement Failure, Critical\n");
+		else if (pmFail > 500) {
+			printf("Process Management Critical Failure: Shutting Down");
+			Thread::Sleep(1000);
 			PMData->Shutdown.Status = 0xFF;
-			break;
 		}
 		else {
 			//Do nothing
