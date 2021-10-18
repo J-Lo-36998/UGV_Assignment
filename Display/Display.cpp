@@ -282,7 +282,7 @@ void idle() {
 		}
 		//If PM is dead come in here and increment pmFail and check at another time stamp
 		
-		else if (pmFail > 500) {//PM is Dead, shutdown as critical
+		else if (pmFail > 1000) {//PM is Dead, shutdown as critical
 			Console::WriteLine("Process Mangement Failure, Critical\n");
 			Thread::Sleep(1000);
 			PMData->Shutdown.Status = 0xFF;

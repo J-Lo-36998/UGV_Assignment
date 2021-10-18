@@ -147,7 +147,7 @@ int main() {
 				break;
 			}
 			//If PM is dead come in here and increment pmFail and check at another time stamp
-			else if (pmFail > 500) {
+			else if (pmFail > 1000) {
 				
 				Console::WriteLine("Process Mangement Failure, Critical\n");
 				Thread::Sleep(1000);

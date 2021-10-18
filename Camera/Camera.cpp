@@ -146,7 +146,7 @@ void idle(){
 			break;
 		}
 		//If PM is dead come in here and increment pmFail and check at another time stamp
-		else if (pmFail > 500) {
+		else if (pmFail > 1000) {
 			printf("Process Management Critical Failure: Shutting Down");
 			Thread::Sleep(1000);
 			PMData->Shutdown.Status = 0xFF;
