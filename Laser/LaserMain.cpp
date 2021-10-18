@@ -3,6 +3,8 @@
 #using <System.dll>
 #include <SMObject.h>
 #include <smstructs.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 #using <System.dll>
 
 using namespace System;
@@ -22,6 +24,8 @@ int Shutdown = 0x00;
 #define MILSEC 1000
 //Time in ms in the loops and also when to check again
 #define WAIT_TIME 1000
+
+
 //Declaring Shared memory
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
@@ -128,8 +132,8 @@ int main() {
 
 		for (int i = 0; i < NumRanges; i++) {
 			Range[i] =System::Convert::ToInt32(StringArray[26 + i], 16);
-			RangeX[i] = Range[i] * sin(i * Resolution);
-			RangeY[i] = -Range[i] * cos(i * Resolution);
+			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI/180));
+			RangeY[i] = -Range[i] * cos(i * Resolution) * (M_PI / 180);
 			printf("\nX direction: %f\n", RangeX[i]);
 			printf("Y direction: %f\n", RangeY[i]);
 		}
