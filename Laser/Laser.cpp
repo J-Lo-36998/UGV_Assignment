@@ -21,15 +21,15 @@ String^ ResponseData;
 Client = gcnew TcpClient(hostName, portNumber);
 // Configure connection
 Client->NoDelay = true;
-Client->ReceiveTimeout = 1000;//ms
-Client->SendTimeout = 1000;//ms
+Client->ReceiveTimeout = 1500;//ms
+Client->SendTimeout = 1500;//ms
 Client->ReceiveBufferSize = 2048;
 Client->SendBufferSize = 1024;
 //declaring stream
 Stream = Client->GetStream();
 // unsigned char arrays of 16 bytes each are created on managed heap
-SendData = gcnew array<unsigned char>(32);
-ReadData = gcnew array<unsigned char>(5000);
+SendData = gcnew array<unsigned char>(64);
+ReadData = gcnew array<unsigned char>(7500);
 // Get the network streab object associated with clien so we 
 // can use it to read and write
 NetworkStream^ Stream = Client->GetStream();
@@ -38,7 +38,7 @@ NetworkStream^ Stream = Client->GetStream();
 SendData = System::Text::Encoding::ASCII->GetBytes(StudID);
 Stream->Write(SendData, 0, SendData->Length);
 // Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
-System::Threading::Thread::Sleep(150);
+System::Threading::Thread::Sleep(200);
 // Read the incoming data
 Stream->Read(ReadData, 0, ReadData->Length);
 ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
@@ -76,7 +76,7 @@ int Laser::sendDataToSharedMemory()
 	Stream->Write(SendData, 0, SendData->Length);
 	Stream->WriteByte(0x03);
 	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
-	System::Threading::Thread::Sleep(150);
+	System::Threading::Thread::Sleep(200);
 	// Read the incoming data
 	Stream->Read(ReadData, 0, ReadData->Length);
 	// Convert incoming data from an array of unsigned char bytes to an ASCII string
