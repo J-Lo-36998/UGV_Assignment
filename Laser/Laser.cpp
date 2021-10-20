@@ -93,7 +93,7 @@ int Laser::sendDataToSharedMemory()
 	array<double>^ RangeY = gcnew array<double>(NumRanges);
 
 	//Console::WriteLine(StringArray[0]);
-	if (NumRanges == 361) {
+	if (NumRanges == 361 && StringArray[0]->EndsWith("sRA")) {
 		for (int i = 0; i < NumRanges; i++) {
 			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
