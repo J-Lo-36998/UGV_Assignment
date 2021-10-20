@@ -18,7 +18,7 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Diagnostics;
 using namespace System::Threading;
-#define NUM_UNITS 5
+#define NUM_UNITS 1
 //for convertion to ms
 #define MILSEC 1000
 //Time in ms in the loops and also when to check again
@@ -32,7 +32,7 @@ void RestartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
-	TEXT("Laser.exe"),
+	TEXT("Laser1.exe"),
 	TEXT("Display.exe"),
 	TEXT("Vehicle.exe"),
 	TEXT("GPS.exe"),
@@ -205,13 +205,13 @@ int main(){
 			//Laser Section
 			LaserFailure(PMData, LaserFail);
 			////Display Section
-			DispFailure(PMData, DispFail);
+			//DispFailure(PMData, DispFail);
 			//////Vehicle Section 
-			VehicleFailure(PMData, VFail);
+			//VehicleFailure(PMData, VFail);
 			////GPS Section (Non Critical)
-			GPSFailure(PMData, GpsFail);
+			//GPSFailure(PMData, GpsFail);
 			////Camera Section (Non Critical)
-			CameraFailure(PMData, CamFail);
+			//CameraFailure(PMData, CamFail);
 		}
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;
