@@ -63,6 +63,7 @@ int Laser::getData()
 int Laser::checkData()
 {
 	// YOUR CODE HERE
+	//find length of array and make sure equal to correct value
 	return 1;
 }
 int Laser::sendDataToSharedMemory()
@@ -80,7 +81,7 @@ int Laser::sendDataToSharedMemory()
 	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	//Writing Laser Data onto screen
 	array<wchar_t>^ Space = { ' ' };
-	array<String^>^ StringArray = ResponseData->Split(Space);
+	array<String^>^ StringArray = ResponseData->Split(Space);//check if this is 386
 	double StartAngle = System::Convert::ToInt32(StringArray[23], 16);
 	double Resolution = System::Convert::ToInt32(StringArray[24], 16) / 10000.0;
 	int NumRanges = System::Convert::ToInt32(StringArray[25], 16);

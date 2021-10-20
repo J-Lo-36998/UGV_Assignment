@@ -32,7 +32,7 @@ void RestartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
-	TEXT("LASER.exe"),
+	TEXT("Laser1.exe"),
 	TEXT("Display.exe"),
 	TEXT("Vehicle.exe"),
 	TEXT("GPS.exe"),

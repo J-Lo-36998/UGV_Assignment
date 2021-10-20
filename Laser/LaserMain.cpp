@@ -47,7 +47,7 @@ int main() {
 		double TimeGap = 0;
 		// Print the received string on the screen
 		//Console::WriteLine(ResponseData);
-		//myLaser.sendDataToSharedMemory();
+		myLaser.sendDataToSharedMemory();
 		//For HeartBeats
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		while (TimeGap <= 4000 && myLaser.getShutdownFlag() != 0xFF) {
