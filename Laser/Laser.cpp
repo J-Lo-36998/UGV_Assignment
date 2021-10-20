@@ -2,6 +2,8 @@
 #include "Laser.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <iostream>
+
 int Laser::connect(String^ hostName, int portNumber)
 {
 // LMS151 port number must be 2111
@@ -90,12 +92,20 @@ int Laser::sendDataToSharedMemory()
 	array<double>^ RangeX = gcnew array<double>(NumRanges);
 	array<double>^ RangeY = gcnew array<double>(NumRanges);
 
-	for (int i = 0; i < NumRanges; i++) {
-		Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
-		RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
-		RangeY[i] = -Range[i] * cos(i * Resolution) * (M_PI / 180);
-		printf("\nX direction: %f\n", RangeX[i]);
-		printf("Y direction: %f\n", RangeY[i]);
+	//Console::WriteLine(StringArray[0]);
+	if (NumRanges == 361) {
+		for (int i = 0; i < NumRanges; i++) {
+			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
+			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
+			RangeY[i] = -Range[i] * cos(i * Resolution) * (M_PI / 180);
+			printf("\nX direction: %f\n", RangeX[i]);
+			printf("Y direction: %f\n", RangeY[i]);
+		}
+	}
+	
+	else {
+	//do nothing /skip
+		//Console::WriteLine(NumRanges);
 	}
 	return 1;
 }
