@@ -62,7 +62,7 @@ ref class UGV_module
 		NetworkStream^ Stream;				// Handle for TCP data stream
 		array<unsigned char>^ ReadData;		// Array to store sensor Data
 
-		SMObject* ProcessManagementData;	// Filled in setupSharedMemory(). For accessing PM shared Memory
+		SMObject* PMData;	// Filled in setupSharedMemory(). For accessing PM shared Memory
 		SMObject* SensorData;				// Filled in setupSharedMemory(). For storing sensory data to shared Memory
 
 };

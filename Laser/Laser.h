@@ -17,13 +17,15 @@ public:
 	int checkData() override;
 	int sendDataToSharedMemory() override;
 	bool getShutdownFlag() override;
+	int getHBFlag() override;
 	int setHeartbeat(bool heartbeat) override;
+	int ShutDown() override;
 	int disconnect() override;
 	~Laser();
 
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
-	ProcessManagement* PMData;
+	ProcessManagement* PMPtr;
 	array<unsigned char>^ SendData;
 	array<unsigned char>^ ReadData;
 	String^ ResponseData;

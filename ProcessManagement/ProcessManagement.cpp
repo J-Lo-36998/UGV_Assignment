@@ -171,6 +171,10 @@ void CameraFailure(ProcessManagement* PMData, int& CamFail) {
 	Thread::Sleep(5);
 }
 int main(){
+	//Shared memory instantiation
+	PMObj.SMCreate();
+	PMObj.SMAccess();
+	PMData = (ProcessManagement*)PMObj.pData;
 	//start all 5 modules
 	StartProcesses();
 	//Local variable declarations
@@ -184,10 +188,6 @@ int main(){
 	int VFail{ 0 };//Vehicle
 	int GpsFail{ 0 };//GPS
 	int CamFail{ 0 };//Camera
-	//Shared memory instantiation
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	PMData = (ProcessManagement*)PMObj.pData;
 	
 	//Console::ReadKey();
 	int ProcessFailed[NUM_UNITS] = {0};
