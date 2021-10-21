@@ -1,4 +1,4 @@
-#include "Gps.h"
+#include "GPS.h"
 
 int GPS::connect(String^ hostName, int portNumber) 
 {
@@ -8,6 +8,10 @@ int GPS::connect(String^ hostName, int portNumber)
 int GPS::setupSharedMemory() 
 {
 	// YOUR CODE HERE
+	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	PMData->SMAccess();
+	PMPtr = (ProcessManagement*)PMData->pData;
+	PMPtr->Shutdown.Flags.GPS = 0;
 	return 1;
 }
 int GPS::getData() 
@@ -28,11 +32,21 @@ int GPS::sendDataToSharedMemory()
 bool GPS::getShutdownFlag() 
 {
 	// YOUR CODE HERE
-	return 1;
+	return PMPtr->Shutdown.Status;
+}
+int GPS::getHBFlag() {
+	return PMPtr->Heartbeat.Flags.GPS;
 }
 int GPS::setHeartbeat(bool heartbeat) 
 {
 	// YOUR CODE HERE
+	heartbeat = 1;
+	PMPtr->Heartbeat.Flags.GPS = heartbeat;
+	return 1;
+}
+int GPS::ShutDown(){
+	PMPtr->Shutdown.Status = 0xFF;
+	exit(0);
 	return 1;
 }
 GPS::~GPS()

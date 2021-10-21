@@ -129,6 +129,7 @@ int Laser::setHeartbeat(bool heartbeat)
 }
 int Laser::ShutDown() {
 	PMPtr->Shutdown.Status = 0xFF;
+	exit(0);
 	return 1;
 }
 int Laser::disconnect() {

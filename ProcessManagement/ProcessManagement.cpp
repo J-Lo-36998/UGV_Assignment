@@ -32,10 +32,10 @@ void RestartProcesses();
 //defining start up sequence
 TCHAR Units[10][20] = //
 {
-	TEXT("Laser_z5267217.exe"),
+	TEXT("Laser.exe"),
+	TEXT("GPS.exe"),
 	TEXT("Display.exe"),
 	TEXT("Vehicle.exe"),
-	TEXT("GPS.exe"),
 	TEXT("Camera.exe")
 };
 //Checks if Laser still Alive

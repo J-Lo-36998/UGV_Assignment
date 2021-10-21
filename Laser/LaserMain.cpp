@@ -38,8 +38,8 @@ int main() {
 	PMData = (ProcessManagement*)PMObj.pData;*/
 	Laser myLaser;
 	myLaser.setupSharedMemory();
-	myLaser.connect("192.168.1.200", 23000);
-	myLaser.getData();
+	//myLaser.connect("192.168.1.200", 23000);
+	//myLaser.getData();
 	while (myLaser.getShutdownFlag() != 0xFF) {
 		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
@@ -47,7 +47,7 @@ int main() {
 		double TimeGap = 0;
 		// Print the received string on the screen
 		//Console::WriteLine(ResponseData);
-		myLaser.sendDataToSharedMemory();
+		//myLaser.sendDataToSharedMemory();
 		//For HeartBeats
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		while (TimeGap <= 4000 && myLaser.getShutdownFlag() != 0xFF) {
@@ -57,10 +57,10 @@ int main() {
 			TimeGap = Next - Prev;//getting the time gap
 			if (myLaser.getHBFlag() == 0) {
 				//Reset value of pmFail if PM still Alive
-				//printf("%d\n", myLaser.getHBFlag());
+				printf("%d\n", myLaser.getHBFlag());
 				myLaser.setHeartbeat(hb);
 				pmFail = 0;
-				//printf("%d\n", myLaser.getHBFlag());
+				printf("%d\n", myLaser.getHBFlag());
 				//break;
 			}
 			//If PM is dead come in here and increment pmFail and check at another time stamp
@@ -68,9 +68,12 @@ int main() {
 				Console::WriteLine("Process Mangement Failure, Critical\n");
 				Thread::Sleep(1000);
 				myLaser.ShutDown();
-				break;
+				//break;
 			}
-			else {
+			if (myLaser.getShutdownFlag() == 1) {
+				exit(0);
+			}
+			else {	
 				pmFail++;
 			}
 		}

@@ -17,12 +17,14 @@ public:
 	int checkData() override;
 	int sendDataToSharedMemory() override;
 	bool getShutdownFlag() override;
+	int getHBFlag()override;
 	int setHeartbeat(bool heartbeat) override;
+	int GPS::ShutDown() override;
 	~GPS();
 
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
-
+	ProcessManagement* PMPtr;
 };
 
 
