@@ -17,6 +17,7 @@ public:
 	int checkData() override;
 	int sendDataToSharedMemory() override;
 	bool getShutdownFlag() override;
+	int ShutDownSignal() override;
 	int getHBFlag() override;
 	int setHeartbeat(bool heartbeat) override;
 	int ShutDown() override;

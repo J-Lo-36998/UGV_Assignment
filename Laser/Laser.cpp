@@ -116,6 +116,9 @@ bool Laser::getShutdownFlag()
 	// YOUR CODE HERE
 	return PMPtr->Shutdown.Status;
 }
+int Laser::ShutDownSignal() {
+	return PMPtr->Shutdown.Status;
+}
 int Laser::getHBFlag(){
 	return PMPtr->Heartbeat.Flags.Laser;
 }
