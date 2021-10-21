@@ -102,9 +102,6 @@ int Laser::sendDataToSharedMemory()
 			printf("Y direction: %f\n", RangeY[i]);
 		}
 	}
-	else if (PMPtr->Shutdown.Status == 0xFF) {
-		exit(0);
-	}
 	else {
 	//do nothing /skip
 		//Console::WriteLine(NumRanges);
