@@ -145,17 +145,20 @@ void VehicleFailure(ProcessManagement* PMData, int& VFail) {
 	Thread::Sleep(5);
 }
 
-void GPSFailure(ProcessManagement* PMData, int& GpsFail) {
+void GPSFailure(ProcessManagement* PMData, int& GpsFail, array<Process^>^ ProcessList) {
 	if (GpsPmHeartBeat(PMData, GpsFail) == 0) {
 		GpsFail = 0;
 		//break;
 	}
-	else if (GpsFail > 500) {
-		Console::Write("Critical Failure of Display module: Shutting Down\n");
-		PMData->Shutdown.Status = 0xFF;
+	else if (GpsFail > 100) {
+		Console::Write("Non-Critical Failure of GPS module: Shutting Down\n");
+		PMData->Shutdown.Flags.GPS = 1;
+		ProcessList[3]->Start();
+		Thread::Sleep(500);
 		//break;
 	}
 	Thread::Sleep(5);
+
 }
 
 void CameraFailure(ProcessManagement* PMData, int& CamFail) {
@@ -164,7 +167,7 @@ void CameraFailure(ProcessManagement* PMData, int& CamFail) {
 		//break;
 	}
 	else if (CamFail > 500) {
-		Console::Write("Critical Failure of Display module: Shutting Down\n");
+		Console::Write("Non-Critical Failure of Camera module: Shutting Down\n");
 		PMData->Shutdown.Status = 0xFF;
 		//break;
 	}
@@ -176,7 +179,18 @@ int main(){
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 	//start all 5 modules
-	StartProcesses();
+	//StartProcesses();
+	array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "Vehicle", "GPS", "Camera"};
+	array<int>^ Critical = gcnew array<int>(ModuleList->Length) { 1, 1, 1, 0, 0 };
+	array<Process^>^ ProcessList = gcnew array<Process^>(ModuleList->Length);
+	for (int i = 0; i < ModuleList->Length; i++) {
+		if (Process::GetProcessesByName(ModuleList[i])->Length == 0) {
+			ProcessList[i] = gcnew Process;
+			ProcessList[i]->StartInfo->FileName = ModuleList[i];
+			ProcessList[i]->Start();
+			Console::WriteLine("The Process " + ModuleList[i] + ".exe  started");
+		}
+	}
 	//Local variable declarations
 	double PrevTime, NextTime;
 	__int64 Frequency{}, Counter;
@@ -209,7 +223,7 @@ int main(){
 			//////Vehicle Section 
 			VehicleFailure(PMData, VFail);
 			////GPS Section (Non Critical)
-			GPSFailure(PMData, GpsFail);
+			GPSFailure(PMData, GpsFail, ProcessList);
 			////Camera Section (Non Critical)
 			CameraFailure(PMData, CamFail);
 		}
@@ -246,20 +260,20 @@ void StartProcesses()
 	STARTUPINFO s[10];
 	PROCESS_INFORMATION p[10];
 
-	for (int i = 0; i < NUM_UNITS; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		if (!IsProcessRunning(Units[i]))
+		if (!IsProcessRunning("GPS.exe"))
 		{
 			ZeroMemory(&s[i], sizeof(s[i]));
 			s[i].cb = sizeof(s[i]);
 			ZeroMemory(&p[i], sizeof(p[i]));
 
-			if (!CreateProcess(NULL, Units[i], NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &s[i], &p[i]))
+			if (!CreateProcess(NULL, "GPS.exe", NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &s[i], &p[i]))
 			{
-				printf("%s failed (%d).\n", Units[i], GetLastError());
+				printf("%s failed (%d).\n", "GPS.exe", GetLastError());
 				_getch();
 			}
-			std::cout << "Started: " << Units[i] << std::endl;
+			std::cout << "Started: " << "GPS.exe" << std::endl;
 			Sleep(100);
 		}
 	}
