@@ -64,22 +64,17 @@ int main() {
 				//break;
 			}
 			//If PM is dead come in here and increment pmFail and check at another time stamp
-			else if (pmFail > 1000 ) {
+			
+			else if (pmFail > 50 ) {
 				Console::WriteLine("Process Mangement Failure, Critical\n");
 				Thread::Sleep(1000);
 				myLaser.ShutDown();
 				//break;
 			}
-			//if (myLaser.getShutdownFlag() == 1) {
-			//	printf("%d", myLaser.getShutdownFlag());
-			//	printf("GOOD NIGHT");
-			//	break;
-			//	//Thread::Sleep(2000);
-			//	
-			//}
 			else {	
 				pmFail++;
 			}
+			printf("%d", pmFail);
 		}
 		//on shutdown signal exit and close window
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);

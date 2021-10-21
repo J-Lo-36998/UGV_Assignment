@@ -32,7 +32,7 @@ int GPS::sendDataToSharedMemory()
 bool GPS::getShutdownFlag() 
 {
 	// YOUR CODE HERE
-	return PMPtr->Shutdown.Status;
+	return PMPtr->Shutdown.Flags.GPS;
 }
 int GPS::getHBFlag() {
 	return PMPtr->Heartbeat.Flags.GPS;
