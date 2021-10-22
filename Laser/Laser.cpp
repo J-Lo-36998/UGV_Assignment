@@ -51,8 +51,14 @@ int Laser::setupSharedMemory()
 {
 	// YOUR CODE HERE
 	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	
 	PMData->SMAccess();
 	PMPtr = (ProcessManagement*)PMData->pData;
+
+	SensorData = new SMObject(TEXT("SM_Laser"), sizeof(SM_Laser));
+	SensorData->SMAccess();
+	LaserPtr = (SM_Laser*)SensorData->pData;
+
 	PMPtr->Shutdown.Flags.Laser = 0;
 	return 1;
 }
@@ -98,8 +104,10 @@ int Laser::sendDataToSharedMemory()
 			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
 			RangeY[i] = -Range[i] * cos(i * Resolution) * (M_PI / 180);
-			printf("\nX direction: %f\n", RangeX[i]);
-			printf("Y direction: %f\n", RangeY[i]);
+			LaserPtr->x[i] = RangeX[i];
+			LaserPtr->y[i] = RangeY[i];
+			printf("\nX direction: %f\n", LaserPtr->x[i]);
+			printf("Y direction: %f\n", LaserPtr->y[i]);
 		}
 	}
 	else {

@@ -88,6 +88,9 @@ int Shutdown = 0x00;
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 
+SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
+SM_Laser* SensorData = (SM_Laser*)LaserObj.pData;
+
 int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
@@ -109,6 +112,9 @@ int main(int argc, char ** argv) {
 	//Instantiating Shared Memory
 	PMObj.SMCreate();
 	PMObj.SMAccess();
+	LaserObj.SMCreate();
+	LaserObj.SMAccess();
+	SensorData = (SM_Laser*)LaserObj.pData;
 	PMData = (ProcessManagement*)PMObj.pData;
 
 	const int WINDOW_WIDTH = 800;
@@ -148,7 +154,6 @@ int main(int argc, char ** argv) {
 	if (vehicle != NULL) {
 		delete vehicle;
 	}
-
 	return 0;
 }
 

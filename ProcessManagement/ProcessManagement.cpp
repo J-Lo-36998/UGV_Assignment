@@ -26,6 +26,9 @@ using namespace System::Threading;
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 
+SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
+SM_Laser* SensorData = (SM_Laser*)LaserObj.pData;
+
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
 void RestartProcesses();
@@ -177,7 +180,10 @@ int main(){
 	//Shared memory instantiation
 	PMObj.SMCreate();
 	PMObj.SMAccess();
+	LaserObj.SMCreate();
+	LaserObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
+	SensorData = (SM_Laser*)LaserObj.pData;
 	//start all 5 modules
 	//StartProcesses();
 	array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "Vehicle", "GPS", "Camera"};
