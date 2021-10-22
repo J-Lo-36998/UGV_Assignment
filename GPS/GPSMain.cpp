@@ -25,7 +25,7 @@ int main() {
 	GPS myGPS;
 	myGPS.setupSharedMemory();
 
-
+	myGPS.connect("192.168.1.200", 24000);
 	while (myGPS.getShutdownFlag() != 0xFF) {
 		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
@@ -37,10 +37,11 @@ int main() {
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 			Next = (double)Counter / (double)Frequency * MILSEC;
 			TimeGap = Next - Prev;//getting the time gap
+			
 			if (myGPS.getHBFlag() == 0) {
-				printf("%d\n", myGPS.getHBFlag());
+				//printf("%d\n", myGPS.getHBFlag());
 				myGPS.setHeartbeat(hb);
-				printf("%d\n", myGPS.getHBFlag());
+				//printf("%d\n", myGPS.getHBFlag());
 				pmFail = 0;
 				break;
 			}
@@ -50,6 +51,8 @@ int main() {
 				Thread::Sleep(1000);
 				myGPS.ShutDown();
 			}
+			myGPS.getData();
+			myGPS.sendDataToSharedMemory();
 			//If shutdown flag is triggered exit
 			if (myGPS.getShutdownFlag() == 1) {
 				exit(0);

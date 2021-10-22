@@ -28,14 +28,14 @@ int Shutdown = 0x00;
 
 
 //Declaring Shared memory
-SMObject PMObj(TEXT("LaserData"), sizeof(SM_Laser));
-SM_Laser* LaserData = (SM_Laser*)PMObj.pData;
+SMObject LaserObj(TEXT("LaserData"), sizeof(SM_Laser));
+SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 
 int main() {
 	//Instantiating Sharedmemory (Creating and allowing access)
-	PMObj.SMCreate();
-	PMObj.SMAccess();
-	LaserData = (SM_Laser*)PMObj.pData;
+	//PMObj.SMCreate();
+	LaserObj.SMAccess();
+	LaserData = (SM_Laser*)LaserObj.pData;
 	Laser myLaser;
 	myLaser.setupSharedMemory();
 	myLaser.connect("192.168.1.200", 23000);

@@ -58,7 +58,6 @@ int Laser::setupSharedMemory()
 	SensorData = new SMObject(TEXT("SM_Laser"), sizeof(SM_Laser));
 	SensorData->SMAccess();
 	LaserPtr = (SM_Laser*)SensorData->pData;
-
 	PMPtr->Shutdown.Flags.Laser = 0;
 	return 1;
 }

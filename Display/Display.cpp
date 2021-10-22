@@ -89,7 +89,7 @@ SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
 
 SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
-SM_Laser* SensorData = (SM_Laser*)LaserObj.pData;
+SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 
 int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
@@ -114,7 +114,7 @@ int main(int argc, char ** argv) {
 	PMObj.SMAccess();
 	LaserObj.SMCreate();
 	LaserObj.SMAccess();
-	SensorData = (SM_Laser*)LaserObj.pData;
+	LaserData = (SM_Laser*)LaserObj.pData;
 	PMData = (ProcessManagement*)PMObj.pData;
 
 	const int WINDOW_WIDTH = 800;
@@ -295,6 +295,7 @@ void idle() {
 		else {
 			//Do nothing
 		}
+		
 	}
 	Thread::Sleep(10);
 	// do a simulation step

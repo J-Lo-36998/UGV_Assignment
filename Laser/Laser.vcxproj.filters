@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LaserMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Laser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LaserMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

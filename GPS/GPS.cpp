@@ -1,8 +1,48 @@
 #include "GPS.h"
-
+using namespace System;
+using namespace System::Diagnostics;
+using namespace System::Threading;
 int GPS::connect(String^ hostName, int portNumber) 
 {
 	// YOUR CODE HERE
+	// LMS151 port number must be 2111
+// Pointer to TcpClent type object on managed heap
+
+// arrays of unsigned chars to send and receive data
+// String command to ask for Channel 1 analogue voltage from the PLC
+// These command are available on Galil RIO47122 command reference manual
+// available online
+
+	
+	// String to store received data for display
+	
+	// Creat TcpClient object and connect to it
+	Client = gcnew TcpClient(hostName, portNumber);
+	// Configure connection
+	Client->NoDelay = true;
+	Client->ReceiveTimeout = 1500;//ms
+	Client->SendTimeout = 1500;//ms
+	Client->ReceiveBufferSize = 2048;
+	Client->SendBufferSize = 1024;
+	ReadData = gcnew array<unsigned char>(7500);
+	//declaring stream
+	Stream = Client->GetStream();
+	// unsigned char arrays of 16 bytes each are created on managed heap
+	
+	// Get the network streab object associated with clien so we 
+	// can use it to read and writeNetworkStream^ Stream = Client->GetStream();
+	//Authenticate user
+	// Convert string command to an array of unsigned char
+	
+	//Stream->Write(SendData, 0, SendData->Length);
+	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
+	System::Threading::Thread::Sleep(10);
+	// Read the incoming data
+	//Stream->Read(ReadData, 0, ReadData->Length);
+	//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
+	// Print the received string on the screen
+	//Console::WriteLine(ResponseData);
+
 	return 1;
 }
 int GPS::setupSharedMemory() 
@@ -11,12 +51,22 @@ int GPS::setupSharedMemory()
 	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	PMData->SMAccess();
 	PMPtr = (ProcessManagement*)PMData->pData;
+
+	SensorData = new SMObject(TEXT("SM_GPS"), sizeof(SM_GPS));
+	SensorData->SMAccess();
+	GpsPtr = (SM_GPS*)SensorData->pData;
+
 	PMPtr->Shutdown.Flags.GPS = 0;
 	return 1;
 }
 int GPS::getData() 
 {
 	// YOUR CODE HERE
+	Thread::Sleep(100);
+	if (Stream->DataAvailable) {
+		Stream->Read(ReadData, 0, ReadData->Length);
+	}
+	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	return 1;
 }
 int GPS::checkData() 
@@ -27,6 +77,14 @@ int GPS::checkData()
 int GPS::sendDataToSharedMemory() 
 {
 	// YOUR CODE HERE
+	BPtr = (unsigned char*)GpsPtr;
+	for (int i = 0; i < 112; i++) {
+		Console::WriteLine("{0, 4:X2}", ReadData[i]);
+		*(BPtr++) = ReadData[i];
+	}
+	Console::WriteLine("Northing: {0, 12:F3}", GpsPtr->northing);
+	Console::WriteLine("Easting: {0, 12:F3}", GpsPtr->easting);
+	Console::WriteLine("Height: {0, 12:F3}", GpsPtr->height);
 	return 1;
 }
 bool GPS::getShutdownFlag() 

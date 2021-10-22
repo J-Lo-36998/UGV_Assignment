@@ -27,20 +27,13 @@ SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
 
 SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
-SM_Laser* SensorData = (SM_Laser*)LaserObj.pData;
+SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
+
+SMObject GpsObj(TEXT("SM_GPS"), sizeof(SM_GPS));
+SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
 
 bool IsProcessRunning(const char* processName);
-void StartProcesses();
-void RestartProcesses();
-//defining start up sequence
-TCHAR Units[10][20] = //
-{
-	TEXT("Laser.exe"),
-	TEXT("GPS.exe"),
-	TEXT("Display.exe"),
-	TEXT("Vehicle.exe"),
-	TEXT("Camera.exe")
-};
+
 //Checks if Laser still Alive
 int LaserPmHeartBeat(ProcessManagement* PMData, int &LaserFail) {
 	if (PMData->Heartbeat.Flags.Laser == 1) {
@@ -180,13 +173,19 @@ int main(){
 	//Shared memory instantiation
 	PMObj.SMCreate();
 	PMObj.SMAccess();
+
 	LaserObj.SMCreate();
 	LaserObj.SMAccess();
+
+	GpsObj.SMCreate();
+	GpsObj.SMAccess();
+
 	PMData = (ProcessManagement*)PMObj.pData;
-	SensorData = (SM_Laser*)LaserObj.pData;
+	LaserData = (SM_Laser*)LaserObj.pData;
+	GpsData = (SM_GPS*)GpsObj.pData;
 	//start all 5 modules
 	//StartProcesses();
-	array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "Vehicle", "GPS", "Camera"};
+	array<String^>^ ModuleList = gcnew array<String^>{"Laser1", "Display1", "Vehicle", "GPS", "Camera"};
 	array<int>^ Critical = gcnew array<int>(ModuleList->Length) { 1, 1, 1, 0, 0 };
 	array<Process^>^ ProcessList = gcnew array<Process^>(ModuleList->Length);
 	for (int i = 0; i < ModuleList->Length; i++) {
@@ -260,108 +259,3 @@ bool IsProcessRunning(const char* processName)
 	return exists;
 }
 
-
-void StartProcesses()
-{
-	STARTUPINFO s[10];
-	PROCESS_INFORMATION p[10];
-
-	for (int i = 0; i < 1; i++)
-	{
-		if (!IsProcessRunning("GPS.exe"))
-		{
-			ZeroMemory(&s[i], sizeof(s[i]));
-			s[i].cb = sizeof(s[i]);
-			ZeroMemory(&p[i], sizeof(p[i]));
-
-			if (!CreateProcess(NULL, "GPS.exe", NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &s[i], &p[i]))
-			{
-				printf("%s failed (%d).\n", "GPS.exe", GetLastError());
-				_getch();
-			}
-			std::cout << "Started: " << "GPS.exe" << std::endl;
-			Sleep(100);
-		}
-	}
-}
-
-void RestartProcesses()
-{
-	STARTUPINFO s[10];
-	PROCESS_INFORMATION p[10];
-
-	for (int i = 0; i < NUM_UNITS; i++)
-	{
-		if (!IsProcessRunning(Units[i]))
-		{
-			ZeroMemory(&s[i], sizeof(s[i]));
-			s[i].cb = sizeof(s[i]);
-			ZeroMemory(&p[i], sizeof(p[i]));
-
-			if (!CreateProcess(NULL, Units[i], NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &s[i], &p[i]))
-			{
-				printf("%s failed (%d).\n", Units[i], GetLastError());
-				_getch();
-			}
-			std::cout << "Restarting: " << Units[i] << std::endl;
-			Sleep(100);
-		}
-	}
-}
-
-
-/*else {
-				if (TimeGap > 3000) {
-					Console::ReadKey();
-					PMData->Shutdown.Status = 0xFF;
-				}
-			}*/
-			/*else if (LaserPmHeartBeat(PMData) == 1) {
-				if (TimeGap < 1000 && LaserFail == 0) {
-					LaserFail++;
-				}
-				else if (TimeGap < 2000 && LaserFail == 1) {
-					LaserFail++;
-				}
-				else if (TimeGap < 3000 && LaserFail == 2) {
-					LaserFail++;
-				}
-				if (LaserFail == 3) {
-					Console::ReadKey();
-					PMData->Shutdown.Status = 0xFF;
-				}
-			}*/
-			//printf("%d", LaserFail);
-		//}
-		//Thread::Sleep(25);	
-	//}
-
-
-			//printf("%d", timeGap);
-
-		/*if (LaserFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Laser Module");
-		}
-		if (DisplayFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Display Module");
-		}
-		if (VehicleFail(PMData, ProcessFailed) == TRUE) {
-
-			PMData->Shutdown.Status = 0xFF;
-			printf("Critical Failure of Vehicle Module");
-		}
-		if (GpsFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Flags.GPS = 1;
-			printf("Failure of Non-critical Process: GPS, Restarting");
-			RestartProcesses();
-
-		}
-		if (CameraFail(PMData, ProcessFailed) == TRUE) {
-			PMData->Shutdown.Flags.Camera = 1;
-			printf("Failure of Non-critical Process: Camera, Restarting");
-			RestartProcesses();
-		}*/
-		/*if (PMData->Shutdown.Status == 0xFF)
-			break;*/

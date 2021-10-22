@@ -24,7 +24,11 @@ public:
 
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
+	unsigned char* BPtr;
 	ProcessManagement* PMPtr;
+	String^ ResponseData;
+	TcpClient^ Client;
+	SM_GPS* GpsPtr;
 };
 
 
