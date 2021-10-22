@@ -30,6 +30,7 @@ protected:
 	array<unsigned char>^ SendData;
 	array<unsigned char>^ ReadData;
 	String^ ResponseData;
+	TcpClient^ Client;
 	NetworkStream^ Stream;
 };
 

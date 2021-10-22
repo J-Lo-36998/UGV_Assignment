@@ -8,7 +8,7 @@ int Laser::connect(String^ hostName, int portNumber)
 {
 // LMS151 port number must be 2111
 // Pointer to TcpClent type object on managed heap
-TcpClient^ Client;
+
 // arrays of unsigned chars to send and receive data
 // String command to ask for Channel 1 analogue voltage from the PLC
 // These command are available on Galil RIO47122 command reference manual
