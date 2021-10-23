@@ -193,11 +193,14 @@ void display() {
 	glLineWidth(1.5);
 	
 	glBegin(GL_LINES);
-	glVertex3f(0, 0, 0);
+	//glVertex3f(0, 0, 0);
 	for (int i = 0; i < 361; i++) {
 		Console::WriteLine("x " + int(LaserData->x[i]));
-		glVertex3f(LaserData->x[i]/1000,0, LaserData->y[i] / 1000);
 		Console::WriteLine("y " + int(LaserData->y[i]));	
+		//glVertex3f(0, 0, 0);
+		glVertex3f(LaserData->x[i]/1000, 0, -LaserData->y[i]/1000);
+		glVertex3f(LaserData->x[i]/1000,1, -LaserData->y[i]/1000);
+		//glVertex3f(0, 0, 1);
 	}
 	//glVertex3f(1,0,0);
 	glEnd();
