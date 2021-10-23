@@ -40,7 +40,7 @@ int main() {
 	myLaser.setupSharedMemory();
 	myLaser.connect("192.168.1.200", 23000);
 	myLaser.getData();
-	while (myLaser.ShutDownSignal() != 0xFF) {
+	while (myLaser.getShutdownFlag() != 1) {
 		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 		Prev = (double)Counter / (double)Frequency * MILSEC;
@@ -50,7 +50,7 @@ int main() {
 		myLaser.sendDataToSharedMemory();
 		//For HeartBeats
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
-		while (TimeGap <= 4000 && myLaser.ShutDownSignal() != 0xFF) {
+		while (TimeGap <= 4000 && myLaser.getShutdownFlag() != 1) {
 			//Instantiating next time stamp/reset once gets past 4000ms
 			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 			Next = (double)Counter / (double)Frequency * MILSEC;
@@ -79,7 +79,7 @@ int main() {
 		//on shutdown signal exit and close window
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		Thread::Sleep(10);
-		if (myLaser.ShutDownSignal() == 0xFF) {
+		if (myLaser.getShutdownFlag() == 1) {
 			break;
 		}
 	}

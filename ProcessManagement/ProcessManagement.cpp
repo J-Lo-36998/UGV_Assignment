@@ -150,6 +150,7 @@ void GPSFailure(ProcessManagement* PMData, int& GpsFail, array<Process^>^ Proces
 		Console::Write("Non-Critical Failure of GPS module: Shutting Down\n");
 		PMData->Shutdown.Flags.GPS = 1;
 		ProcessList[3]->Start();
+		Console::WriteLine("GPS Module Restarted");
 		Thread::Sleep(500);
 		//break;
 	}
@@ -157,14 +158,17 @@ void GPSFailure(ProcessManagement* PMData, int& GpsFail, array<Process^>^ Proces
 
 }
 
-void CameraFailure(ProcessManagement* PMData, int& CamFail) {
+void CameraFailure(ProcessManagement* PMData, int& CamFail, array<Process^>^ ProcessList) {
 	if (CameraPmHeartBeat(PMData, CamFail) == 0) {
 		CamFail = 0;
 		//break;
 	}
-	else if (CamFail > 500) {
+	else if (CamFail > 100) {
 		Console::Write("Non-Critical Failure of Camera module: Shutting Down\n");
-		PMData->Shutdown.Status = 0xFF;
+		PMData->Shutdown.Flags.Camera = 1;
+		ProcessList[4]->Start();
+		Console::Write("Camera Module Restarted\n");
+		Thread::Sleep(500);
 		//break;
 	}
 	Thread::Sleep(5);
@@ -230,7 +234,7 @@ int main(){
 			////GPS Section (Non Critical)
 			GPSFailure(PMData, GpsFail, ProcessList);
 			////Camera Section (Non Critical)
-			CameraFailure(PMData, CamFail);
+			CameraFailure(PMData, CamFail, ProcessList);
 		}
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;

@@ -118,7 +118,7 @@ int Laser::sendDataToSharedMemory()
 bool Laser::getShutdownFlag()
 {
 	// YOUR CODE HERE
-	return PMPtr->Shutdown.Status;
+	return PMPtr->Shutdown.Flags.Laser;
 }
 int Laser::ShutDownSignal() {
 	return PMPtr->Shutdown.Status;

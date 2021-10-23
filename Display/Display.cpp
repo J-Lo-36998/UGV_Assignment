@@ -71,6 +71,7 @@ int prev_mouse_y = -1;
 
 // vehicle control related variables
 Vehicle * vehicle = NULL;
+
 double speed = 0;
 double steering = 0;
 int setup = 0;
@@ -155,6 +156,7 @@ int main(int argc, char ** argv) {
 	//   custom vehicle.
 	// -------------------------------------------------------------------------
 	vehicle = new MyVehicle();	
+
 	glutMainLoop();
 
 	if (vehicle != NULL) {
@@ -285,7 +287,6 @@ void idle() {
 	string northing = "Northing: ";
 	northing+=std::to_string(GpsData->northing);
 	const char* N = northing.c_str();
-	
 	std::cout << northing << std::endl;
 	Console::WriteLine("Easting: " + GpsData->easting);
 	Console::WriteLine("Height: " + GpsData->height);
