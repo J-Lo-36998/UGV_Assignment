@@ -217,7 +217,7 @@ void display() {
 
 	}
 	// draw HUD
-	HUD::Draw();
+	HUD::Draw(GpsData->northing, GpsData->easting, GpsData->height);
 	
 	//HUD::DrawGauge(500, 280, 210, -40, 40, vehicle->getSteering(), "Steer");
 	

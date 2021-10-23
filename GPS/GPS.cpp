@@ -112,7 +112,9 @@ int GPS::sendDataToSharedMemory()
 
 		Console::WriteLine("Height: {0, 12:F3}", GpsPtr->height);
 
-		Console::WriteLine("CRC32: {0, 12:F3}", GPSdata->Checksum);
+		Console::WriteLine("Check Sum Value is: {0, 12:F3}", GPSdata->Checksum);
+
+		Console::WriteLine("CRC32 value is: {0, 12:F3}", CalculateBlockCRC32(108, (unsigned char*)GPSdata));
 	}
 	return 1;
 }

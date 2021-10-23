@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #include <math.h>
-
+#include <string>
 #include <map>
 
 
@@ -138,20 +138,36 @@ void HUD::DrawGauge(double x, double y, double r, double min, double max, double
 	glPopMatrix();
 }
 
-void HUD::Draw()
+void HUD::Draw(double northing, double easting, double height)
 {
 	Camera::get()->switchTo2DDrawing();
 	int winWidthOff = (Camera::get()->getWindowWidth() - 800) * .5;
 	if(winWidthOff < 0)
 		winWidthOff = 0;
+	//Converting Northing data to string
+	std::string north = "Northing:  ";
+	north+= std::to_string(northing);
+	const char* N = north.c_str();
+
+	//Converting Easting data to string
+	std::string east = "Easting:  ";
+	east += std::to_string(easting);
+	const char* E = east.c_str();
+
+	//Converting Height data to string
+	std::string heights = "Height:  ";
+	heights += std::to_string(height);
+	const char* H = heights.c_str();
 
 	if(vehicle) {
 		glColor3f(1, 0, 0);
 		DrawGauge(200+winWidthOff, 280, 210, -1, 1, vehicle->getSpeed(), "Speed");
 		glColor3f(1, 1, 0);
 		DrawGauge(600+winWidthOff, 280, 210, -40, 40, vehicle->getSteering(), "Steer");
-		glColor3f(0, 1, 0);	
 	}
-
+	glColor3f(0, 1, 0);	
+	RenderString(N, 10, 20, GLUT_BITMAP_HELVETICA_10);
+	RenderString(E, 150, 20, GLUT_BITMAP_HELVETICA_10);
+	RenderString(H, 300, 20, GLUT_BITMAP_HELVETICA_10);
 	Camera::get()->switchTo3DDrawing();
 }

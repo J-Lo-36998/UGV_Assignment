@@ -109,7 +109,7 @@ void LaserFailure(ProcessManagement* PMData, int& LaserFail) {
 		LaserFail = 0;
 		//break;
 	}
-	else if (LaserFail > 500) {
+	else if (LaserFail > 100) {
 		Console::Write("Critical Failure of Laser module: Shutting Down\n");
 		PMData->Shutdown.Status = 0xFF;
 		//break;
@@ -121,7 +121,7 @@ void DispFailure(ProcessManagement* PMData, int& DispFail) {
 		DispFail = 0;
 		//break;
 	}
-	else if (DispFail > 500) {
+	else if (DispFail > 100) {
 		Console::Write("Critical Failure of Display module: Shutting Down\n");
 		PMData->Shutdown.Status = 0xFF;
 		//break;
@@ -133,7 +133,7 @@ void VehicleFailure(ProcessManagement* PMData, int& VFail) {
 		VFail = 0;
 		//break;
 	}
-	else if (VFail > 500) {
+	else if (VFail > 100) {
 		Console::Write("Critical Failure of Vehicle module: Shutting Down\n");
 		PMData->Shutdown.Status = 0xFF;
 		//break;
@@ -240,6 +240,7 @@ int main(){
 			break;
 		}
 	}
+	Console::WriteLine("Please Press a Key to Exit");
 	Console::ReadKey();
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
