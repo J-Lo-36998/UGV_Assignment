@@ -62,11 +62,27 @@ int GPS::setupSharedMemory()
 int GPS::getData() 
 {
 	// YOUR CODE HERE
+	//printf("hi");
 	Thread::Sleep(100);
 	if (Stream->DataAvailable) {
+		//printf("bye");
 		Stream->Read(ReadData, 0, ReadData->Length);
+		//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
+		//Console::WriteLine(ResponseData);
+		// trap header 
+		unsigned int Header = 0;
+		unsigned char Data;
+		int i = 0;
+		do
+		{
+			//printf("bye");
+			Data = ReadData[i++];
+			Header = ((Header << 8) | Data);
+			//Console::WriteLine("{0:X}" + Header);
+		} while (Header != 0xaa44121c);
+		Start = i - 4;
 	}
-	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
+	//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	return 1;
 }
 int GPS::checkData() 
@@ -77,14 +93,27 @@ int GPS::checkData()
 int GPS::sendDataToSharedMemory() 
 {
 	// YOUR CODE HERE
-	BPtr = (unsigned char*)GpsPtr;
-	for (int i = 0; i < 112; i++) {
-		Console::WriteLine("{0, 4:X2}", ReadData[i]);
+	GPSdata = new GPSstruct;
+	unsigned char* BPtr = nullptr;
+	BPtr = (unsigned char*)GPSdata;
+	for (int i = Start; i < Start+sizeof(GPSstruct); i++) {
+		//Console::WriteLine("{0, 4:X2}", ReadData[i]);
 		*(BPtr++) = ReadData[i];
 	}
-	Console::WriteLine("Northing: {0, 12:F3}", GpsPtr->northing);
-	Console::WriteLine("Easting: {0, 12:F3}", GpsPtr->easting);
-	Console::WriteLine("Height: {0, 12:F3}", GpsPtr->height);
+	if (GPSdata->Checksum == CalculateBlockCRC32(108,(unsigned char*)GPSdata)) {
+		//printf("hi");
+		GpsPtr->northing = GPSdata->Northing;
+		GpsPtr->easting = GPSdata->Easting;
+		GpsPtr->height = GPSdata->Height;
+
+		Console::WriteLine("Northing: {0, 12:F3}", GpsPtr->northing);
+
+		Console::WriteLine("Easting: {0, 12:F3}", GpsPtr->easting);
+
+		Console::WriteLine("Height: {0, 12:F3}", GpsPtr->height);
+
+		Console::WriteLine("CRC32: {0, 12:F3}", GPSdata->Checksum);
+	}
 	return 1;
 }
 bool GPS::getShutdownFlag() 

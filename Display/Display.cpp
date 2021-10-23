@@ -276,6 +276,11 @@ void idle() {
 	double TimeGap = 0;
 	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 	Prev = (double)Counter / (double)Frequency * MILSEC;
+	for (int i = 0; i < 361; i++)
+	{
+		Console::WriteLine("x " + int(LaserData->x[i]));
+		Console::WriteLine("y " + int(LaserData->y[i]));
+	}
 	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 		//Instantiating next time stamp/reset once gets past 4000ms
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
