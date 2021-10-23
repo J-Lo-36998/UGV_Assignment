@@ -74,7 +74,7 @@ int main() {
 			else {	
 				pmFail++;
 			}
-			printf("%d", pmFail);
+			//printf("%d", pmFail);
 		}
 		//on shutdown signal exit and close window
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);

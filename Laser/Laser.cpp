@@ -102,7 +102,7 @@ int Laser::sendDataToSharedMemory()
 		for (int i = 0; i < NumRanges; i++) {
 			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
-			RangeY[i] = -Range[i] * cos(i * Resolution) * (M_PI / 180);
+			RangeY[i] = -Range[i] * cos(i * Resolution * (M_PI / 180));
 			LaserPtr->x[i] = RangeX[i];
 			LaserPtr->y[i] = RangeY[i];
 			printf("\nX direction: %f\n", LaserPtr->x[i]);

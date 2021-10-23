@@ -186,7 +186,25 @@ void display() {
 	}
 	Camera::get()->updateLocation();
 	Camera::get()->setLookAt();
+	
+	glPushMatrix();
+	glTranslatef(0.5, 0.3, 0);
+	glColor3f(1.0, 0.5, 0);
+	glLineWidth(1.5);
+	
+	glBegin(GL_LINES);
+	glVertex3f(0, 0, 0);
+	for (int i = 0; i < 361; i++) {
+		Console::WriteLine("x " + int(LaserData->x[i]));
+		glVertex3f(LaserData->x[i]/1000,0, LaserData->y[i] / 1000);
+		Console::WriteLine("y " + int(LaserData->y[i]));	
+	}
+	//glVertex3f(1,0,0);
+	glEnd();
+	
+	glPopMatrix();
 
+	//glEnd();
 	Ground::draw();
 	
 	// draw my vehicle
@@ -284,12 +302,12 @@ void idle() {
 	double TimeGap = 0;
 	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 	Prev = (double)Counter / (double)Frequency * MILSEC;
-	string northing = "Northing: ";
+	/*string northing = "Northing: ";
 	northing+=std::to_string(GpsData->northing);
 	const char* N = northing.c_str();
 	std::cout << northing << std::endl;
 	Console::WriteLine("Easting: " + GpsData->easting);
-	Console::WriteLine("Height: " + GpsData->height);
+	Console::WriteLine("Height: " + GpsData->height);*/
 
 	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 		//Instantiating next time stamp/reset once gets past 4000ms

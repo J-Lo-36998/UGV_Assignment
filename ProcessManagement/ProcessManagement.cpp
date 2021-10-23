@@ -192,7 +192,7 @@ int main(){
 	array<String^>^ ModuleList = gcnew array<String^>{"Laser1", "Display1", "Vehicle", "GPS", "Camera"};
 	array<int>^ Critical = gcnew array<int>(ModuleList->Length) { 1, 1, 1, 0, 0 };
 	array<Process^>^ ProcessList = gcnew array<Process^>(ModuleList->Length);
-	for (int i = 0; i < ModuleList->Length; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (Process::GetProcessesByName(ModuleList[i])->Length == 0) {
 			ProcessList[i] = gcnew Process;
 			ProcessList[i]->StartInfo->FileName = ModuleList[i];
@@ -230,11 +230,11 @@ int main(){
 			////Display Section
 			DispFailure(PMData, DispFail);
 			//////Vehicle Section 
-			VehicleFailure(PMData, VFail);
+			//VehicleFailure(PMData, VFail);
 			////GPS Section (Non Critical)
-			GPSFailure(PMData, GpsFail, ProcessList);
+			//GPSFailure(PMData, GpsFail, ProcessList);
 			////Camera Section (Non Critical)
-			CameraFailure(PMData, CamFail, ProcessList);
+			//CameraFailure(PMData, CamFail, ProcessList);
 		}
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;
