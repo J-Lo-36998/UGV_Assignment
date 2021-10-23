@@ -26,7 +26,7 @@
     <ClCompile Include="GPSMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SMObject.cpp">
+    <ClCompile Include="..\Common\SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

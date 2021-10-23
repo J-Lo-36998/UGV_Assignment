@@ -18,10 +18,10 @@
     <ClCompile Include="VehicleMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SMObject.cpp">
+    <ClCompile Include="VehicleControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VehicleControl.cpp">
+    <ClCompile Include="..\Common\SMObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

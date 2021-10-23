@@ -121,9 +121,9 @@
     <ClInclude Include="GPS.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\SMObject.cpp" />
     <ClCompile Include="GPS.cpp" />
     <ClCompile Include="GPSMain.cpp" />
-    <ClCompile Include="SMObject.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

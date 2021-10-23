@@ -115,7 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SMObject.cpp" />
+    <ClCompile Include="..\Common\SMObject.cpp" />
     <ClCompile Include="VehicleControl.cpp" />
     <ClCompile Include="VehicleMain.cpp" />
   </ItemGroup>

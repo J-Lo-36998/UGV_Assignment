@@ -108,8 +108,8 @@ int SMObject::SMAccess()
 
 	return SMAccessError;
 }
-/*
-void SMObject::SetSzname(TCHAR *szname)
+
+void SMObject::SetSzname(TCHAR* szname)
 {
 	szName = szname;
 }
@@ -117,5 +117,4 @@ void SMObject::SetSzname(TCHAR *szname)
 void SMObject::SetSize(int size)
 {
 	Size = size;
-}*/
-
+}
