@@ -71,7 +71,7 @@ int prev_mouse_y = -1;
 
 // vehicle control related variables
 Vehicle * vehicle = NULL;
-
+//HUD* myHUD = NULL;
 double speed = 0;
 double steering = 0;
 int setup = 0;
@@ -114,11 +114,11 @@ int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 int main(int argc, char ** argv) {
 
 	//Instantiating Shared Memory
-	PMObj.SMCreate();
+	//PMObj.SMCreate();
 	PMObj.SMAccess();
-	LaserObj.SMCreate();
+	//LaserObj.SMCreate();
 	LaserObj.SMAccess();
-	GpsObj.SMCreate();
+	//GpsObj.SMCreate();
 	GpsObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 	LaserData = (SM_Laser*)LaserObj.pData;
@@ -188,25 +188,26 @@ void display() {
 	Camera::get()->setLookAt();
 	
 	glPushMatrix();
-	glTranslatef(0.5, 0.3, 0);
-	glColor3f(1.0, 0.5, 0);
-	glLineWidth(1.5);
-	
-	glBegin(GL_LINES);
-	//glVertex3f(0, 0, 0);
-	for (int i = 0; i < 361; i++) {
-		Console::WriteLine("x " + int(LaserData->x[i]));
-		Console::WriteLine("y " + int(LaserData->y[i]));	
+		vehicle->positionInGL();
+		glTranslatef(0.5, 0, 0);//0.5 is to front of car, 0.3 is to middle of car from sides
+		//glColor3f(1.0, 0.5, 0);
+		//glRotatef(-vehicle->getRotation(), 0, vehicle->getY(), vehicle->getZ());
+		glBegin(GL_LINES);
 		//glVertex3f(0, 0, 0);
-		glVertex3f(LaserData->x[i]/1000, 0, -LaserData->y[i]/1000);
-		glVertex3f(LaserData->x[i]/1000,1, -LaserData->y[i]/1000);
-		//glVertex3f(0, 0, 1);
-	}
-	//glVertex3f(1,0,0);
-	glEnd();
-	
-	glPopMatrix();
+		for (int i = 0; i < 361; i++) {
+			//Console::WriteLine("x " + int(LaserData->x[i]));
+			//Console::WriteLine("y " + int(LaserData->y[i]));	
+			//glVertex3f(0, 0, 0);
 
+			glVertex3f(LaserData->x[i]/1000, 0, -(LaserData->y[i]/1000));
+			glVertex3f(LaserData->x[i]/1000,1, -(LaserData->y[i] / 1000));
+			//glVertex3f(0, 0, 1);
+		}
+		//glVertex3f(1,0,0);
+		glEnd();
+	glPopMatrix();
+	
+	//
 	//glEnd();
 	Ground::draw();
 	
@@ -217,6 +218,8 @@ void display() {
 	}
 	// draw HUD
 	HUD::Draw();
+	
+	//HUD::DrawGauge(500, 280, 210, -40, 40, vehicle->getSteering(), "Steer");
 	
 	glutSwapBuffers();
 };
