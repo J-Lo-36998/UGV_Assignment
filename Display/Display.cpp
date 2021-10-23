@@ -5,7 +5,7 @@
 #include <cstring>
 #include <sstream>
 #include <map>
-
+#include <string> 
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
 	#include <OpenGL/glu.h>
@@ -91,6 +91,9 @@ ProcessManagement* PMData;
 SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
 SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 
+SMObject GpsObj(TEXT("SM_GPS"), sizeof(SM_GPS));
+SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
+
 int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
@@ -114,8 +117,11 @@ int main(int argc, char ** argv) {
 	PMObj.SMAccess();
 	LaserObj.SMCreate();
 	LaserObj.SMAccess();
-	LaserData = (SM_Laser*)LaserObj.pData;
+	GpsObj.SMCreate();
+	GpsObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
+	LaserData = (SM_Laser*)LaserObj.pData;
+	GpsData = (SM_GPS*)GpsObj.pData;
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -276,11 +282,14 @@ void idle() {
 	double TimeGap = 0;
 	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
 	Prev = (double)Counter / (double)Frequency * MILSEC;
-	for (int i = 0; i < 361; i++)
-	{
-		Console::WriteLine("x " + int(LaserData->x[i]));
-		Console::WriteLine("y " + int(LaserData->y[i]));
-	}
+	string northing = "Northing: ";
+	northing+=std::to_string(GpsData->northing);
+	const char* N = northing.c_str();
+	
+	std::cout << northing << std::endl;
+	Console::WriteLine("Easting: " + GpsData->easting);
+	Console::WriteLine("Height: " + GpsData->height);
+
 	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
 		//Instantiating next time stamp/reset once gets past 4000ms
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
