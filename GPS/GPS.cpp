@@ -4,18 +4,6 @@ using namespace System::Diagnostics;
 using namespace System::Threading;
 int GPS::connect(String^ hostName, int portNumber) 
 {
-	// YOUR CODE HERE
-	// LMS151 port number must be 2111
-// Pointer to TcpClent type object on managed heap
-
-// arrays of unsigned chars to send and receive data
-// String command to ask for Channel 1 analogue voltage from the PLC
-// These command are available on Galil RIO47122 command reference manual
-// available online
-
-	
-	// String to store received data for display
-	
 	// Creat TcpClient object and connect to it
 	Client = gcnew TcpClient(hostName, portNumber);
 	// Configure connection
@@ -27,62 +15,43 @@ int GPS::connect(String^ hostName, int portNumber)
 	ReadData = gcnew array<unsigned char>(7500);
 	//declaring stream
 	Stream = Client->GetStream();
-	// unsigned char arrays of 16 bytes each are created on managed heap
-	
-	// Get the network streab object associated with clien so we 
-	// can use it to read and writeNetworkStream^ Stream = Client->GetStream();
-	//Authenticate user
-	// Convert string command to an array of unsigned char
-	
-	//Stream->Write(SendData, 0, SendData->Length);
 	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
 	System::Threading::Thread::Sleep(10);
-	// Read the incoming data
-	//Stream->Read(ReadData, 0, ReadData->Length);
-	//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
-	// Print the received string on the screen
-	//Console::WriteLine(ResponseData);
-
 	return 1;
 }
 int GPS::setupSharedMemory() 
 {
 	// YOUR CODE HERE
+	//Declaring and accessing PM Shared memory
 	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	PMData->SMAccess();
 	PMPtr = (ProcessManagement*)PMData->pData;
-
+	//Declaring and accessing GPS Shared memory
 	SensorData = new SMObject(TEXT("SM_GPS"), sizeof(SM_GPS));
 	SensorData->SMAccess();
 	GpsPtr = (SM_GPS*)SensorData->pData;
-
+	//Initialising shutdown flag to zero
 	PMPtr->Shutdown.Flags.GPS = 0;
 	return 1;
 }
 int GPS::getData() 
 {
-	// YOUR CODE HERE
-	//printf("hi");
 	Thread::Sleep(100);
+	//if data is coming in for checking
 	if (Stream->DataAvailable) {
-		//printf("bye");
 		Stream->Read(ReadData, 0, ReadData->Length);
-		//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
-		//Console::WriteLine(ResponseData);
-		// trap header 
-		unsigned int Header = 0;
+		//To find the header in the data string
+		unsigned int dataHeader = 0;
 		unsigned char Data;
 		int i = 0;
-		do
+		do //finds the header 0xaa44121c
 		{
-			//printf("bye");
-			Data = ReadData[i++];
-			Header = ((Header << 8) | Data);
-			//Console::WriteLine("{0:X}" + Header);
-		} while (Header != 0xaa44121c);
-		Start = i - 4;
+			Data = ReadData[i++]; //gets next char in data array
+			dataHeader = ((dataHeader << 8) | Data);//each time shifts by 2 hex characters which is 8 bits to check for header again
+		} 
+		while (dataHeader != 0xaa44121c);//checks if data header is the same as the header of raw data
+		Start = i - 4; //go back to begining of header/first element (starting point of data array)
 	}
-	//ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	return 1;
 }
 int GPS::checkData() 
@@ -92,48 +61,49 @@ int GPS::checkData()
 }
 int GPS::sendDataToSharedMemory() 
 {
-	// YOUR CODE HERE
 	GPSdata = new GPSstruct;
 	unsigned char* BPtr = nullptr;
-	BPtr = (unsigned char*)GPSdata;
-	for (int i = Start; i < Start+sizeof(GPSstruct); i++) {
-		//Console::WriteLine("{0, 4:X2}", ReadData[i]);
+	BPtr = (unsigned char*)GPSdata;//Pointer to beginning of data location
+	//Iterate throught data and add to pointer to GPS data struct
+	for (int i = Start; i < Start + sizeof(GPSstruct); i++) {
 		*(BPtr++) = ReadData[i];
 	}
+	//checks if the checksum is equal to the CRC32 value, if it is then data is good
 	if (GPSdata->Checksum == CalculateBlockCRC32(108,(unsigned char*)GPSdata)) {
-		//printf("hi");
-		GpsPtr->northing = GPSdata->Northing;
-		GpsPtr->easting = GPSdata->Easting;
-		GpsPtr->height = GPSdata->Height;
+		GpsPtr->northing = GPSdata->Northing;//Assigns the Northing data to SM
+		GpsPtr->easting = GPSdata->Easting; //Assign easting data to SM
+		GpsPtr->height = GPSdata->Height;//Assign height to SM
 
+		//Print norhting to console
 		Console::WriteLine("Northing: {0, 12:F3}", GpsPtr->northing);
-
+		//Print easting to console
 		Console::WriteLine("Easting: {0, 12:F3}", GpsPtr->easting);
-
+		//Print height to console
 		Console::WriteLine("Height: {0, 12:F3}", GpsPtr->height);
-
-		Console::WriteLine("Check Sum Value is: {0, 12:F3}", GPSdata->Checksum);
-
-		Console::WriteLine("CRC32 value is: {0, 12:F3}", CalculateBlockCRC32(108, (unsigned char*)GPSdata));
+		//write checksum value
+		Console::WriteLine("Check Sum Value is:	{0, 12:F3}", GPSdata->Checksum);
+		//Writes cec32 valute for comparison
+		Console::WriteLine("CRC32 value is:		{0, 12:F3}", CalculateBlockCRC32(108, (unsigned char*)GPSdata));
 	}
 	return 1;
 }
 bool GPS::getShutdownFlag() 
 {
-	// YOUR CODE HERE
+	//returns shutdown flag status
 	return PMPtr->Shutdown.Flags.GPS;
 }
 int GPS::getHBFlag() {
+	//returns hearbeat flag
 	return PMPtr->Heartbeat.Flags.GPS;
 }
 int GPS::setHeartbeat(bool heartbeat) 
 {
-	// YOUR CODE HERE
-	heartbeat = 1;
+	//sets heartbeat
 	PMPtr->Heartbeat.Flags.GPS = heartbeat;
 	return 1;
 }
 int GPS::ShutDown(){
+	//if this is called either PM is dead or shutdown command given so exit all and shutdown all
 	PMPtr->Shutdown.Status = 0xFF;
 	exit(0);
 	return 1;

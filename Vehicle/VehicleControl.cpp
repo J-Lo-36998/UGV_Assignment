@@ -2,15 +2,10 @@
 
 int VehicleControl::connect(String^ hostName, int portNumber)
 {
-	// YOUR CODE HERE
-	// LMS151 port number must be 2111
-// Pointer to TcpClent type object on managed heap
-
-// arrays of unsigned chars to send and receive data
-// String command to ask for Channel 1 analogue voltage from the PLC
-// These command are available on Galil RIO47122 command reference manual
-// available online
-
+	// arrays of unsigned chars to send and receive data
+	// String command to ask for Channel 1 analogue voltage from the PLC
+	// These command are available on Galil RIO47122 command reference manual
+	// available online
 	Client = gcnew TcpClient(hostName, portNumber);
 	// Configure connection
 	Client->NoDelay = true;
@@ -23,11 +18,7 @@ int VehicleControl::connect(String^ hostName, int portNumber)
 	// unsigned char arrays of 16 bytes each are created on managed heap
 	SendData = gcnew array<unsigned char>(64);
 	ReadData = gcnew array<unsigned char>(2048);
-	String^ StudID = gcnew String("5267217\n");
-	// Creat TcpClient object and connect to it
-	// Get the network streab object associated with clien so we 
-	// can use it to read and write
-	
+	String^ StudID = gcnew String("5267217\n");//zid for authentication
 	//Authenticate user
 	// Convert string command to an array of unsigned char
 	SendData = System::Text::Encoding::ASCII->GetBytes(StudID);
@@ -43,15 +34,16 @@ int VehicleControl::connect(String^ hostName, int portNumber)
 }
 int VehicleControl::setupSharedMemory()
 {
-	// YOUR CODE HERE
+	//setting up and accessing shared memmory
+	//For Process management SM
 	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	PMData->SMAccess();
 	PMPtr = (ProcessManagement*)PMData->pData;
-
+	//For vehicle control shared memmory
 	SensorData = new SMObject(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
 	SensorData->SMAccess();
 	VehiclePtr = (SM_VehicleControl*)SensorData->pData;
-
+	//initialise the shut down flag to zero (vehicle is on)
 	PMPtr->Shutdown.Flags.VehicleControl = 0;
 	return 1;
 }
@@ -69,35 +61,35 @@ int VehicleControl::sendDataToSharedMemory()
 {
 	// YOUR CODE HERE
 	
-	
 	return 1;
 }
 void VehicleControl::controls() {
 	int Vehicleflag = 0;
-	VehiclePtr->flag = !VehiclePtr->flag;
-	Vehicleflag = int(VehiclePtr->flag);
+	VehiclePtr->flag = !VehiclePtr->flag;//change vehicle flag to show its working/ actively controlling vehicle
+	Vehicleflag = int(VehiclePtr->flag);//convert bool to int in order to print as 1 and 0
 	String^ vehicleControl = gcnew String("#	" + Math::Round((VehiclePtr->Steering),2) + "	" + Math::Round((VehiclePtr->Speed),2) + "	 " + Vehicleflag + "	#");
-	Console::WriteLine(vehicleControl);
+	Console::WriteLine(vehicleControl); //write the control string to vehicle console
 	SendData = System::Text::Encoding::ASCII->GetBytes(vehicleControl);
 	Stream->Write(SendData, 0, SendData->Length);
 	System::Threading::Thread::Sleep(10);
 }
 bool VehicleControl::getShutdownFlag()
 {
-	// YOUR CODE HERE
+	// returns current shutdown status of vehicle
 	return PMPtr->Shutdown.Flags.VehicleControl;
 }
 int VehicleControl::getHBFlag() {
+	//returns the current hb flag for vehicle
 	return PMPtr->Heartbeat.Flags.VehicleControl;
 }
 int VehicleControl::setHeartbeat(bool heartbeat)
 {
-	// YOUR CODE HERE
-	heartbeat = 1;
+	//sets the heartbeat of vehicle
 	PMPtr->Heartbeat.Flags.VehicleControl = heartbeat;
 	return 1;
 }
 int VehicleControl::ShutDown() {
+	//if function is called, PM is dead or shutdown signal given, so exit
 	PMPtr->Shutdown.Status = 0xFF;
 	exit(0);
 	return 1;

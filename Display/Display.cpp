@@ -85,49 +85,50 @@ int Shutdown = 0x00;
 #define MILSEC 1000
 //Time in ms in the loops and also when to check again
 #define WAIT_TIME 1000
+
 //Declaring Shared memory
+//Process Management SM
 SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 ProcessManagement* PMData;
-
+//Laser SM
 SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
 SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
-
+//GPS SM
 SMObject GpsObj(TEXT("SM_GPS"), sizeof(SM_GPS));
 SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
-
+//Vehicle SM
 SMObject VehicleObj(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
 SM_VehicleControl* VehicleData = (SM_VehicleControl*)VehicleObj.pData;
 
+//Function to change and check the Displays hb 
 int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
-		//if pm not dead pmFail variable is reset
-		pmFail = 0;
-		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing prev value of hb (what PM changed it to)
-		PMData->Heartbeat.Flags.OpenGL = 1;
-		//printf("%d\n", PMData->Heartbeat.Flags.OpenGL);//Printing new Value of hb flag
+		PMData->Heartbeat.Flags.OpenGL = 1;//set displays hb flag to 1
 		return 0;//return zero if PM still alive
 	}
 	else {
-		pmFail++;
 		return 1;//if Pm dead, return 1
 	}
 }
 //int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char ** argv) {
-
-	//Instantiating Shared Memory
-	//PMObj.SMCreate();
+	//Accessing the PM shared memmory
 	PMObj.SMAccess();
-	//LaserObj.SMCreate();
+	
+	//Accessing Laser Shared memmory
 	LaserObj.SMAccess();
-	//GpsObj.SMCreate();
+
+	//Accessing Gps shared memmory
 	GpsObj.SMAccess();
+
+	//Accessing Vehicle Shared memory
 	VehicleObj.SMAccess();
-	PMData = (ProcessManagement*)PMObj.pData;
-	LaserData = (SM_Laser*)LaserObj.pData;
-	GpsData = (SM_GPS*)GpsObj.pData;
-	VehicleData = (SM_VehicleControl*)VehicleObj.pData;
+
+	PMData = (ProcessManagement*)PMObj.pData;//PM sm
+	LaserData = (SM_Laser*)LaserObj.pData;//Laser sm
+	GpsData = (SM_GPS*)GpsObj.pData;//GPS sm
+	VehicleData = (SM_VehicleControl*)VehicleObj.pData;//vehicle sm
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -191,29 +192,20 @@ void display() {
 	}
 	Camera::get()->updateLocation();
 	Camera::get()->setLookAt();
-	
+	//Drawing the laser data 
 	glPushMatrix();
-		vehicle->positionInGL();
-		glTranslatef(0.5, 0, 0);//0.5 is to front of car
-		glColor3f(1, 1, 1);
-		//glRotatef(-vehicle->getRotation(), 0, vehicle->getY(), vehicle->getZ());
-		glBegin(GL_LINES);
+		vehicle->positionInGL();//set coordinate system to the car
+		glTranslatef(0.5, 0, 0);//0.5 is to front of car so data is displayed from the front of car
+		glColor3f(1, 1, 1);//Set colour to white
+		glBegin(GL_LINES); //Draws lines
 		//glVertex3f(0, 0, 0);
 		for (int i = 0; i < 361; i++) {
-			//Console::WriteLine("x " + int(LaserData->x[i]));
-			//Console::WriteLine("y " + int(LaserData->y[i]));	
-			//glVertex3f(0, 0, 0);
-
-			glVertex3f(LaserData->x[i]/1000, 0, -(LaserData->y[i]/1000));
-			glVertex3f(LaserData->x[i]/1000,1, -(LaserData->y[i] / 1000));
-			//glVertex3f(0, 0, 1);
+			glVertex3f(LaserData->x[i]/1000, 0, -(LaserData->y[i]/1000)); //draws 1st point line at laser x,y
+			glVertex3f(LaserData->x[i]/1000,1, -(LaserData->y[i] / 1000));//draws 2nd point 1 unit up to connect line
 		}
-		//glVertex3f(1,0,0);
-		glEnd();
+		glEnd();//end drawing
 	glPopMatrix();
-	
-	//
-	//glEnd();
+
 	Ground::draw();
 	
 	// draw my vehicle
@@ -222,10 +214,7 @@ void display() {
 
 	}
 	// draw HUD
-	HUD::Draw(GpsData->northing, GpsData->easting, GpsData->height);
-	
-	//HUD::DrawGauge(500, 280, 210, -40, 40, vehicle->getSteering(), "Steer");
-	
+	HUD::Draw(GpsData->northing, GpsData->easting, GpsData->height);//Passing in arguments to render gps data on the hud (data obtained with shared mem)
 	glutSwapBuffers();
 };
 
@@ -304,8 +293,8 @@ void idle() {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
 		
 	}
-	VehicleData->Steering = vehicle->getSteering();
-	VehicleData->Speed = vehicle->getSpeed();
+	VehicleData->Steering = vehicle->getSteering();//send steering data to vehicle sm so it can control
+	VehicleData->Speed = vehicle->getSpeed();//send speed data to vehicle sm for control
 	const float sleep_time_between_frames_in_seconds = 0.025;
 
 	static double previousTime = getTime();
@@ -314,10 +303,10 @@ void idle() {
 	previousTime = currTime;
 	
 	display();
-
+	//while shutdown command is not given or PM is not dead
 	while (PMData->Shutdown.Status != 0xFF) {
 		Thread::Sleep(10);
-		if (DisplayHeartBeat(PMData, pmFail) == 0) {
+		if (DisplayHeartBeat(PMData, pmFail) == 0) {//if hb flag is zero, pm is alive and working
 			pmFail = 0;
 			break;
 		}
@@ -325,7 +314,7 @@ void idle() {
 		else if (pmFail > 1000) {//PM is Dead, shutdown as critical
 			Console::WriteLine("Process Mangement Failure, Critical\n");
 			Thread::Sleep(1000);
-			PMData->Shutdown.Status = 0xFF;
+			PMData->Shutdown.Status = 0xFF;//complete shutdown as PM is critical
 		}
 		//If display hb flag is still 1, increment pmFail and check again later
 		else {
