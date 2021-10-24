@@ -26,18 +26,12 @@ int main() {
 	myGPS.setupSharedMemory();
 
 	myGPS.connect("192.168.1.200", 24000);
-	while (myGPS.getShutdownFlag() != 1) {
-		//Instantiating the prev time stamp/reset
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		Prev = (double)Counter / (double)Frequency * MILSEC;
-		double TimeGap = 0;
+
+	while (pmFail<1000) {
 		//printf("%d\n", PMData->Heartbeat.Flags.GPS);
-		while (TimeGap <= 5 * WAIT_TIME && myGPS.getShutdownFlag() != 1) {
+		while (myGPS.getShutdownFlag() != 1) {
 			//Instantiating next time stamp/reset once gets past 4000ms
-			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-			Next = (double)Counter / (double)Frequency * MILSEC;
-			TimeGap = Next - Prev;//getting the time gap
-			
+			Thread::Sleep(10);
 			if (myGPS.getHBFlag() == 0) {
 				//printf("%d\n", myGPS.getHBFlag());
 				myGPS.setHeartbeat(hb);
@@ -46,20 +40,12 @@ int main() {
 				break;
 			}
 			//If PM is dead come in here and increment pmFail and check at another time
-			else if (pmFail > 1000) {//PM is Dead, shutdown as critical
-				Console::WriteLine("Process Mangement Failure, Critical\n");
-				Thread::Sleep(1000);
-				myGPS.ShutDown();
-			}
-			myGPS.getData();
-			myGPS.sendDataToSharedMemory();
-			//If shutdown flag is triggered exit
-			if (myGPS.getShutdownFlag() == 1) {
-				exit(0);
-			}
 			else {
 				pmFail++;
 			}
+			
+			myGPS.getData();
+			myGPS.sendDataToSharedMemory();
 		}
 		//printf("%d\n", PMData->Heartbeat.Flags.GPS);
 		Thread::Sleep(10);
@@ -67,6 +53,10 @@ int main() {
 		if (myGPS.getShutdownFlag() == 1) {
 			break;
 		}
+	}
+	if (pmFail > 1000) {
+		printf("Process Management Critical Failure: Shutting Down");
+		Thread::Sleep(1000);
 	}
 	myGPS.ShutDown();
 	return 0;

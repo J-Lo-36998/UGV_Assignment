@@ -98,7 +98,8 @@ int Laser::sendDataToSharedMemory()
 	array<double>^ RangeY = gcnew array<double>(NumRanges);
 
 	//Console::WriteLine(StringArray->Length);
-	if (NumRanges == 361 && (StringArray[0]->EndsWith("sRA")) == TRUE && StringArray->Length == 393) {
+	//Console::WriteLine(StringArray[1]);
+	if (NumRanges == 361 && (StringArray[0]->EndsWith("sRA")) == TRUE && StringArray[1]->EndsWith("LMDscandata")) {
 		for (int i = 0; i < NumRanges; i++) {
 			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
@@ -125,7 +126,6 @@ int Laser::getHBFlag(){
 }
 int Laser::setHeartbeat(bool heartbeat)
 {
-	heartbeat = 1;
 	PMPtr->Heartbeat.Flags.Laser = heartbeat;
 	return 1;
 	// YOUR CODE HERE

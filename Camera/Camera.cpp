@@ -77,7 +77,7 @@ int main(int argc, char** argv){
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
 	//Instantiating Shared Memory
-	
+
 	glutMainLoop();
 	return 1;
 }
@@ -127,20 +127,10 @@ void idle(){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
 		delete[] buffer;
 	}
-
 	display();
-	//Instantiating old time stamp and the declaring time gap (so it restes after every loop)
-	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-	PrevTime = (double)Counter / (double)Frequency * MILSEC;
-	double TimeGap = 0;
-	//printf("Hiii");
-	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
+	while ( PMData->Shutdown.Status != 0xFF) {
 		//Instantiating next time stamp/reset once gets past 4000ms
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		NextTime = (double)Counter / (double)Frequency * MILSEC;
-		//Console::WriteLine("Time Gap is Currently : {0,12:F3}", NextTime - PrevTime);
-		TimeGap = NextTime - PrevTime;
-		//PMData->Heartbeat.Flags.Laser = 0;
+		Thread::Sleep(10);
 		if (CameraHeartBeat(PMData, pmFail) == 0) {
 			pmFail = 0;
 			break;
@@ -152,7 +142,7 @@ void idle(){
 			PMData->Shutdown.Status = 0xFF;
 		}
 		else {
-			//Do nothing
+			pmFail++;
 		}
 	}
 	if (PMData->Shutdown.Status == 0xFF) {

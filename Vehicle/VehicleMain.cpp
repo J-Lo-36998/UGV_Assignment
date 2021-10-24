@@ -30,17 +30,9 @@ int main() {
 	PMData = (ProcessManagement*)PMObj.pData;*/
 	VehicleControl myVehicle;
 	myVehicle.setupSharedMemory();
-	while (myVehicle.getShutdownFlag()!=1) {
-		//Instantiating the prev time stamp/reset
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		Prev = (double)Counter / (double)Frequency * MILSEC;
-		double TimeGap = 0;
-		//printf("%d\n", PMData->Heartbeat.Flags.VehicleControl);
-		while (TimeGap <= 4000 && myVehicle.getShutdownFlag() != 1) {
-			//Instantiating next time stamp/reset once gets past 4000ms
-			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-			Next = (double)Counter / (double)Frequency * MILSEC;
-			TimeGap = Next - Prev;//To obtain time gap between times
+	while (pmFail<1000) {
+		while (myVehicle.getShutdownFlag() != 1) {
+			Thread::Sleep(10);
 			if (myVehicle.getHBFlag() == 0) {
 				//Reset value of pmFail if PM still Alive
 				myVehicle.setHeartbeat(hb);
@@ -49,12 +41,9 @@ int main() {
 			}
 			//If PM is dead come in here and increment pmFail and check at another time stamp
 			//PM Shutdown (Since PM is critical, shutdown all)
-			else if (pmFail > 1000) {
-				printf("Process Management Critical Failure: Shutting Down");
-				Thread::Sleep(1000);
-				myVehicle.ShutDown();
+			else {
+				pmFail++;
 			}
-
 		}
 		//printf("%d\n", PMData->Heartbeat.Flags.VehicleControl);
 		Thread::Sleep(10);
@@ -62,6 +51,10 @@ int main() {
 		if (myVehicle.getShutdownFlag() == 1) {
 			break;
 		}
+	}
+	if (pmFail > 1000) {
+		printf("Process Management Critical Failure: Shutting Down");
+		Thread::Sleep(1000);
 	}
 	myVehicle.ShutDown();
 	return 0;

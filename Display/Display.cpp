@@ -304,37 +304,23 @@ void idle() {
 	previousTime = currTime;
 	
 	display();
-	//Instantiating old time stamp and the declaring time gap (so it restes after every loop)
-	double TimeGap = 0;
-	QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-	Prev = (double)Counter / (double)Frequency * MILSEC;
-	/*string northing = "Northing: ";
-	northing+=std::to_string(GpsData->northing);
-	const char* N = northing.c_str();
-	std::cout << northing << std::endl;
-	Console::WriteLine("Easting: " + GpsData->easting);
-	Console::WriteLine("Height: " + GpsData->height);*/
 
-	while (TimeGap <= 5* WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
-		//Instantiating next time stamp/reset once gets past 4000ms
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		Next = (double)Counter / (double)Frequency * MILSEC;
-		TimeGap = Next - Prev;//getting the time gap
+	while (PMData->Shutdown.Status != 0xFF) {
+		Thread::Sleep(10);
 		if (DisplayHeartBeat(PMData, pmFail) == 0) {
 			pmFail = 0;
 			break;
 		}
-		//If PM is dead come in here and increment pmFail and check at another time stamp
-		
+		//If hb = 1 for a while, shut down as PM is dead
 		else if (pmFail > 1000) {//PM is Dead, shutdown as critical
 			Console::WriteLine("Process Mangement Failure, Critical\n");
 			Thread::Sleep(1000);
 			PMData->Shutdown.Status = 0xFF;
 		}
+		//If display hb flag is still 1, increment pmFail and check again later
 		else {
-			//Do nothing
+			pmFail++;
 		}
-		
 	}
 	Thread::Sleep(10);
 	// do a simulation step

@@ -219,20 +219,12 @@ int main(){
 	int VFail{ 0 };//Vehicle
 	int GpsFail{ 0 };//GPS
 	int CamFail{ 0 };//Camera
-	
-	//Console::ReadKey();
-	int ProcessFailed[NUM_UNITS] = {0};
-	
-	//Thread::Sleep(25);
+
 	while (!_kbhit()) {
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-		PrevTime = (double)Counter / (double)Frequency * MILSEC;
-		double TimeGap = 0;
+
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
-		while (TimeGap < 5 * WAIT_TIME && PMData->Shutdown.Status != 0xFF) {
-			QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
-			NextTime = (double)Counter / (double)Frequency * MILSEC;
-			TimeGap = NextTime - PrevTime;
+		while ( PMData->Shutdown.Status != 0xFF) {
+			Thread::Sleep(10);
 			//Laser Section
 			LaserFailure(PMData, LaserFail);
 			////Display Section
@@ -243,6 +235,9 @@ int main(){
 			GPSFailure(PMData, GpsFail, ProcessList);
 			////Camera Section (Non Critical)
 			CameraFailure(PMData, CamFail, ProcessList);
+			if (_kbhit()) {
+				break;
+			}
 		}
 		if (PMData->Shutdown.Status == 0xFF) {
 			break;
