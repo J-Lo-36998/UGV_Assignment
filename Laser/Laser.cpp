@@ -80,7 +80,17 @@ int Laser::checkData()
 {
 	// YOUR CODE HERE
 	//find length of array and make sure equal to correct value
-	return 1;
+	array<wchar_t>^ Space = { ' ' };
+	array<String^>^ StringArray = ResponseData->Split(Space);//check if this is 386
+	double StartAngle = System::Convert::ToInt32(StringArray[23], 16);
+	double Resolution = System::Convert::ToInt32(StringArray[24], 16) / 10000.0;
+	int NumRanges = System::Convert::ToInt32(StringArray[25], 16);
+	if (NumRanges == 361 && (StringArray[0]->EndsWith("sRA")) == TRUE && StringArray[1]->EndsWith("LMDscandata")) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 int Laser::sendDataToSharedMemory()
 {
@@ -97,9 +107,7 @@ int Laser::sendDataToSharedMemory()
 	array<double>^ RangeX = gcnew array<double>(NumRanges);
 	array<double>^ RangeY = gcnew array<double>(NumRanges);
 
-	//Console::WriteLine(StringArray->Length);
-	//Console::WriteLine(StringArray[1]);
-	if (NumRanges == 361 && (StringArray[0]->EndsWith("sRA")) == TRUE && StringArray[1]->EndsWith("LMDscandata")) {
+	if (Laser::checkData()==1) {
 		for (int i = 0; i < NumRanges; i++) {
 			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 			RangeX[i] = Range[i] * sin(i * Resolution * (M_PI / 180));
@@ -111,8 +119,7 @@ int Laser::sendDataToSharedMemory()
 		}
 	}
 	else {
-	//do nothing /skip
-		//Console::WriteLine(NumRanges);
+		//do nothing as invalid data is coming in
 	}
 	return 1;
 }
