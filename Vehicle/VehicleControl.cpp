@@ -73,8 +73,10 @@ int VehicleControl::sendDataToSharedMemory()
 	return 1;
 }
 void VehicleControl::controls() {
+	int Vehicleflag = 0;
 	VehiclePtr->flag = !VehiclePtr->flag;
-	String^ vehicleControl = gcnew String("#	" + VehiclePtr->Steering + "	" + VehiclePtr->Speed + "		" + VehiclePtr->flag + "	#");
+	Vehicleflag = int(VehiclePtr->flag);
+	String^ vehicleControl = gcnew String("#	" + Math::Round((VehiclePtr->Steering),2) + "	" + Math::Round((VehiclePtr->Speed),2) + "	 " + Vehicleflag + "	#");
 	Console::WriteLine(vehicleControl);
 	SendData = System::Text::Encoding::ASCII->GetBytes(vehicleControl);
 	Stream->Write(SendData, 0, SendData->Length);
