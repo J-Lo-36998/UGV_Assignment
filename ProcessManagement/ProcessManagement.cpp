@@ -32,6 +32,9 @@ SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 SMObject GpsObj(TEXT("SM_GPS"), sizeof(SM_GPS));
 SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
 
+SMObject VehicleObj(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
+SM_VehicleControl* VehicleData = (SM_VehicleControl*)VehicleObj.pData;
+
 bool IsProcessRunning(const char* processName);
 
 //Checks if Laser still Alive
@@ -184,9 +187,14 @@ int main(){
 	GpsObj.SMCreate();
 	GpsObj.SMAccess();
 
+	VehicleObj.SMCreate();
+	VehicleObj.SMAccess();
+
 	PMData = (ProcessManagement*)PMObj.pData;
 	LaserData = (SM_Laser*)LaserObj.pData;
 	GpsData = (SM_GPS*)GpsObj.pData;
+	VehicleData = (SM_VehicleControl*)VehicleObj.pData;
+
 	//start all 5 modules
 	//StartProcesses();
 	array<String^>^ ModuleList = gcnew array<String^>{"Laser1", "Display1", "Vehicle", "GPS", "Camera"};

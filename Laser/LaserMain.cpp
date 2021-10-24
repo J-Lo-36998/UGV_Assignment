@@ -34,12 +34,10 @@ SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 int main() {
 	//Instantiating Sharedmemory (Creating and allowing access)
 	//PMObj.SMCreate();
-	LaserObj.SMAccess();
-	LaserData = (SM_Laser*)LaserObj.pData;
+
 	Laser myLaser;
 	myLaser.setupSharedMemory();
 	myLaser.connect("192.168.1.200", 23000);
-	myLaser.getData();
 	while (myLaser.getShutdownFlag() != 1) {
 		//Instantiating the prev time stamp/reset
 		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);
@@ -47,7 +45,7 @@ int main() {
 		double TimeGap = 0;
 		// Print the received string on the screen
 		//Console::WriteLine(ResponseData);
-		myLaser.sendDataToSharedMemory();
+		
 		//For HeartBeats
 		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		while (TimeGap <= 4000 && myLaser.getShutdownFlag() != 1) {
@@ -74,6 +72,8 @@ int main() {
 			else {	
 				pmFail++;
 			}
+			myLaser.getData();
+			myLaser.sendDataToSharedMemory();
 			//printf("%d", pmFail);
 		}
 		//on shutdown signal exit and close window

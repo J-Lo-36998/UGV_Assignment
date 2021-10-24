@@ -45,26 +45,35 @@ ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 // Print the received string on the screen
 Console::WriteLine(ResponseData);
 //Console::ReadKey();
+String^ AskScan = gcnew String("sRN LMDscandata");
+SendData = System::Text::Encoding::ASCII->GetBytes(AskScan);
 return 1;
 }
 int Laser::setupSharedMemory()
 {
 	// YOUR CODE HERE
 	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	
 	PMData->SMAccess();
 	PMPtr = (ProcessManagement*)PMData->pData;
 
 	SensorData = new SMObject(TEXT("SM_Laser"), sizeof(SM_Laser));
 	SensorData->SMAccess();
 	LaserPtr = (SM_Laser*)SensorData->pData;
+
 	PMPtr->Shutdown.Flags.Laser = 0;
 	return 1;
 }
 int Laser::getData()
 {
-	String^ AskScan = gcnew String("sRN LMDscandata");
-	SendData = System::Text::Encoding::ASCII->GetBytes(AskScan);
+	Stream->WriteByte(0x02);
+	Stream->Write(SendData, 0, SendData->Length);
+	Stream->WriteByte(0x03);
+	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
+	System::Threading::Thread::Sleep(200);
+	// Read the incoming data
+	Stream->Read(ReadData, 0, ReadData->Length);
+	// Convert incoming data from an array of unsigned char bytes to an ASCII string
+	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	return 1;
 }
 int Laser::checkData()
@@ -77,15 +86,6 @@ int Laser::sendDataToSharedMemory()
 {
 	// YOUR CODE HERE
 	// Write command asking for data
-	Stream->WriteByte(0x02);
-	Stream->Write(SendData, 0, SendData->Length);
-	Stream->WriteByte(0x03);
-	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
-	System::Threading::Thread::Sleep(200);
-	// Read the incoming data
-	Stream->Read(ReadData, 0, ReadData->Length);
-	// Convert incoming data from an array of unsigned char bytes to an ASCII string
-	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	//Writing Laser Data onto screen
 	array<wchar_t>^ Space = { ' ' };
 	array<String^>^ StringArray = ResponseData->Split(Space);//check if this is 386
@@ -119,9 +119,6 @@ bool Laser::getShutdownFlag()
 {
 	// YOUR CODE HERE
 	return PMPtr->Shutdown.Flags.Laser;
-}
-int Laser::ShutDownSignal() {
-	return PMPtr->Shutdown.Status;
 }
 int Laser::getHBFlag(){
 	return PMPtr->Heartbeat.Flags.Laser;

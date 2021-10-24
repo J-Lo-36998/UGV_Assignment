@@ -16,12 +16,15 @@ public:
 	int checkData() override;
 	int sendDataToSharedMemory() override;
 	bool getShutdownFlag() override;
+	int VehicleControl::getHBFlag() override;
 	int setHeartbeat(bool heartbeat) override;
+	int VehicleControl::ShutDown() override;
 	~VehicleControl();
 
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
-
+	SM_VehicleControl* VehiclePtr;
+	ProcessManagement* PMPtr;
 };
 
 

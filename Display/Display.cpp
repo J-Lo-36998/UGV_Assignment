@@ -189,8 +189,8 @@ void display() {
 	
 	glPushMatrix();
 		vehicle->positionInGL();
-		glTranslatef(0.5, 0, 0);//0.5 is to front of car, 0.3 is to middle of car from sides
-		//glColor3f(1.0, 0.5, 0);
+		glTranslatef(0.5, 0, 0);//0.5 is to front of car
+		glColor3f(1, 1, 1);
 		//glRotatef(-vehicle->getRotation(), 0, vehicle->getY(), vehicle->getZ());
 		glBegin(GL_LINES);
 		//glVertex3f(0, 0, 0);

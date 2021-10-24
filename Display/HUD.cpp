@@ -165,7 +165,7 @@ void HUD::Draw(double northing, double easting, double height)
 		glColor3f(1, 1, 0);
 		DrawGauge(600+winWidthOff, 280, 210, -40, 40, vehicle->getSteering(), "Steer");
 	}
-	glColor3f(0, 1, 0);	
+	glColor3f(1, 1, 1);	
 	RenderString(N, 10, 20, GLUT_BITMAP_HELVETICA_10);
 	RenderString(E, 150, 20, GLUT_BITMAP_HELVETICA_10);
 	RenderString(H, 300, 20, GLUT_BITMAP_HELVETICA_10);

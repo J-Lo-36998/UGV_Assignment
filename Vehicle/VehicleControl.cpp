@@ -8,6 +8,15 @@ int VehicleControl::connect(String^ hostName, int portNumber)
 int VehicleControl::setupSharedMemory()
 {
 	// YOUR CODE HERE
+	PMData = new SMObject(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	PMData->SMAccess();
+	PMPtr = (ProcessManagement*)PMData->pData;
+
+	SensorData = new SMObject(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
+	SensorData->SMAccess();
+	VehiclePtr = (SM_VehicleControl*)SensorData->pData;
+
+	PMPtr->Shutdown.Flags.VehicleControl = 0;
 	return 1;
 }
 int VehicleControl::getData()
@@ -28,11 +37,21 @@ int VehicleControl::sendDataToSharedMemory()
 bool VehicleControl::getShutdownFlag()
 {
 	// YOUR CODE HERE
-	return 1;
+	return PMPtr->Shutdown.Flags.VehicleControl;
+}
+int VehicleControl::getHBFlag() {
+	return PMPtr->Heartbeat.Flags.VehicleControl;
 }
 int VehicleControl::setHeartbeat(bool heartbeat)
 {
 	// YOUR CODE HERE
+	heartbeat = 1;
+	PMPtr->Heartbeat.Flags.VehicleControl = heartbeat;
+	return 1;
+}
+int VehicleControl::ShutDown() {
+	PMPtr->Shutdown.Status = 0xFF;
+	exit(0);
 	return 1;
 }
 VehicleControl::~VehicleControl()
