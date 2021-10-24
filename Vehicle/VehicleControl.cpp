@@ -3,6 +3,42 @@
 int VehicleControl::connect(String^ hostName, int portNumber)
 {
 	// YOUR CODE HERE
+	// LMS151 port number must be 2111
+// Pointer to TcpClent type object on managed heap
+
+// arrays of unsigned chars to send and receive data
+// String command to ask for Channel 1 analogue voltage from the PLC
+// These command are available on Galil RIO47122 command reference manual
+// available online
+
+	Client = gcnew TcpClient(hostName, portNumber);
+	// Configure connection
+	Client->NoDelay = true;
+	Client->ReceiveTimeout = 1500;//ms
+	Client->SendTimeout = 1500;//ms
+	Client->ReceiveBufferSize = 2048;
+	Client->SendBufferSize = 512;
+	//declaring stream
+	Stream = Client->GetStream();
+	// unsigned char arrays of 16 bytes each are created on managed heap
+	SendData = gcnew array<unsigned char>(64);
+	ReadData = gcnew array<unsigned char>(2048);
+	String^ StudID = gcnew String("5267217\n");
+	// Creat TcpClient object and connect to it
+	// Get the network streab object associated with clien so we 
+	// can use it to read and write
+	
+	//Authenticate user
+	// Convert string command to an array of unsigned char
+	SendData = System::Text::Encoding::ASCII->GetBytes(StudID);
+	Stream->Write(SendData, 0, SendData->Length);
+	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
+	System::Threading::Thread::Sleep(10);
+	// Read the incoming data
+	Stream->Read(ReadData, 0, ReadData->Length);
+	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
+	// Print the received string on the screen
+	Console::WriteLine(ResponseData);
 	return 1;
 }
 int VehicleControl::setupSharedMemory()
@@ -32,7 +68,17 @@ int VehicleControl::checkData()
 int VehicleControl::sendDataToSharedMemory()
 {
 	// YOUR CODE HERE
+	
+	
 	return 1;
+}
+void VehicleControl::controls() {
+	VehiclePtr->flag = !VehiclePtr->flag;
+	String^ vehicleControl = gcnew String("#	" + VehiclePtr->Steering + "	" + VehiclePtr->Speed + "		" + VehiclePtr->flag + "	#");
+	Console::WriteLine(vehicleControl);
+	SendData = System::Text::Encoding::ASCII->GetBytes(vehicleControl);
+	Stream->Write(SendData, 0, SendData->Length);
+	System::Threading::Thread::Sleep(10);
 }
 bool VehicleControl::getShutdownFlag()
 {

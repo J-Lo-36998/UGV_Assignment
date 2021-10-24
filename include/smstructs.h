@@ -29,6 +29,7 @@ struct SM_VehicleControl
 {
 	double Speed;
 	double Steering;
+	bool flag;
 };
 
 struct SM_GPS

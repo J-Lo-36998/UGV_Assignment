@@ -15,6 +15,7 @@ public:
 	int getData() override;
 	int checkData() override;
 	int sendDataToSharedMemory() override;
+	void VehicleControl::controls() override;
 	bool getShutdownFlag() override;
 	int VehicleControl::getHBFlag() override;
 	int setHeartbeat(bool heartbeat) override;
@@ -25,6 +26,11 @@ protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
 	SM_VehicleControl* VehiclePtr;
 	ProcessManagement* PMPtr;
+	array<unsigned char>^ SendData;
+	array<unsigned char>^ ReadData;
+	String^ ResponseData;
+	TcpClient^ Client;
+	NetworkStream^ Stream;
 };
 
 

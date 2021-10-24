@@ -35,8 +35,6 @@ SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
 SMObject VehicleObj(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
 SM_VehicleControl* VehicleData = (SM_VehicleControl*)VehicleObj.pData;
 
-bool IsProcessRunning(const char* processName);
-
 //Checks if Laser still Alive
 int LaserPmHeartBeat(ProcessManagement* PMData, int &LaserFail) {
 	if (PMData->Heartbeat.Flags.Laser == 1) {
@@ -221,8 +219,6 @@ int main(){
 	int CamFail{ 0 };//Camera
 
 	while (!_kbhit()) {
-
-		//printf("%d\n", PMData->Heartbeat.Flags.Laser);
 		while ( PMData->Shutdown.Status != 0xFF) {
 			Thread::Sleep(10);
 			//Laser Section
@@ -248,22 +244,3 @@ int main(){
 	PMData->Shutdown.Status = 0xFF;
 	return 0;
 }
-
-//Is process running function
-bool IsProcessRunning(const char* processName)
-{
-	bool exists = false;
-	PROCESSENTRY32 entry;
-	entry.dwSize = sizeof(PROCESSENTRY32);
-
-	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-
-	if (Process32First(snapshot, &entry))
-		while (Process32Next(snapshot, &entry))
-			if (!_stricmp(entry.szExeFile, processName))
-				exists = true;
-
-	CloseHandle(snapshot);
-	return exists;
-}
-

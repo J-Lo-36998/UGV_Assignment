@@ -95,6 +95,9 @@ SM_Laser* LaserData = (SM_Laser*)LaserObj.pData;
 SMObject GpsObj(TEXT("SM_GPS"), sizeof(SM_GPS));
 SM_GPS* GpsData = (SM_GPS*)GpsObj.pData;
 
+SMObject VehicleObj(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
+SM_VehicleControl* VehicleData = (SM_VehicleControl*)VehicleObj.pData;
+
 int DisplayHeartBeat(ProcessManagement* PMData, int &pmFail) {
 	//PM is not dead if value of hb Flag reset to zero
 	if (PMData->Heartbeat.Flags.OpenGL == 0) {
@@ -120,9 +123,11 @@ int main(int argc, char ** argv) {
 	LaserObj.SMAccess();
 	//GpsObj.SMCreate();
 	GpsObj.SMAccess();
+	VehicleObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 	LaserData = (SM_Laser*)LaserObj.pData;
 	GpsData = (SM_GPS*)GpsObj.pData;
+	VehicleData = (SM_VehicleControl*)VehicleObj.pData;
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
@@ -281,21 +286,26 @@ void idle() {
 	steering = 0;
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_LEFT)) {
-		steering = Vehicle::MAX_LEFT_STEERING_DEGS * -1;   
+		steering = Vehicle::MAX_LEFT_STEERING_DEGS * -1;
+		VehicleData->Steering = vehicle->getSteering();
 	}
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_RIGHT)) {
 		steering = Vehicle::MAX_RIGHT_STEERING_DEGS * -1;
+		VehicleData->Steering = vehicle->getSteering();
 	}
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_UP)) {
 		speed = Vehicle::MAX_FORWARD_SPEED_MPS;
+
 	}
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_DOWN)) {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
+		
 	}
-
+	VehicleData->Steering = vehicle->getSteering();
+	VehicleData->Speed = vehicle->getSpeed();
 	const float sleep_time_between_frames_in_seconds = 0.025;
 
 	static double previousTime = getTime();

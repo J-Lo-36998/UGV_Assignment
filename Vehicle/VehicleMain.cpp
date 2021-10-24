@@ -28,14 +28,15 @@ int main() {
 	/*PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;*/
-	VehicleControl myVehicle;
-	myVehicle.setupSharedMemory();
+	VehicleControl myUGV;
+	myUGV.setupSharedMemory();
+	myUGV.connect("192.168.1.200", 25000);
 	while (pmFail<1000) {
-		while (myVehicle.getShutdownFlag() != 1) {
+		while (myUGV.getShutdownFlag() != 1) {
 			Thread::Sleep(10);
-			if (myVehicle.getHBFlag() == 0) {
+			if (myUGV.getHBFlag() == 0) {
 				//Reset value of pmFail if PM still Alive
-				myVehicle.setHeartbeat(hb);
+				myUGV.setHeartbeat(hb);
 				pmFail = 0;
 				break;
 			}
@@ -44,11 +45,12 @@ int main() {
 			else {
 				pmFail++;
 			}
+			myUGV.controls();
 		}
 		//printf("%d\n", PMData->Heartbeat.Flags.VehicleControl);
 		Thread::Sleep(10);
 		//on shutdown signal exit and close window
-		if (myVehicle.getShutdownFlag() == 1) {
+		if (myUGV.getShutdownFlag() == 1) {
 			break;
 		}
 	}
@@ -56,7 +58,7 @@ int main() {
 		printf("Process Management Critical Failure: Shutting Down");
 		Thread::Sleep(1000);
 	}
-	myVehicle.ShutDown();
+	myUGV.ShutDown();
 	return 0;
 }
 
