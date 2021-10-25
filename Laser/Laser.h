@@ -24,14 +24,10 @@ public:
 	~Laser();
 
 protected:
-	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
 	ProcessManagement* PMPtr;
 	SM_Laser* LaserPtr;
 	array<unsigned char>^ SendData;
-	array<unsigned char>^ ReadData;
 	String^ ResponseData;
-	TcpClient^ Client;
-	NetworkStream^ Stream;
 };
 
 
