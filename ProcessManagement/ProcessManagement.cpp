@@ -128,7 +128,7 @@ void GPSFailure(ProcessManagement* PMData, int& GpsFail, array<Process^>^ Proces
 		GpsFail = 0;//gps i alive so reset its fail counter
 	}
 	else if (GpsFail > 100) {
-		Console::Write("Non-Critical Failure of GPS module: Shutting Down\n");
+		Console::Write("Non-Critical Failure of GPS module: Restarting\n");
 		PMData->Shutdown.Flags.GPS = 1;
 		ProcessList[3]->Start();
 		Console::WriteLine("GPS Module Restarted");
@@ -143,7 +143,7 @@ void CameraFailure(ProcessManagement* PMData, int& CamFail, array<Process^>^ Pro
 		CamFail = 0; //camera is alive so reset its fail counter
 	}
 	else if (CamFail > 100) {
-		Console::Write("Non-Critical Failure of Camera module: Shutting Down\n");
+		Console::Write("Non-Critical Failure of Camera module: Restarting\n");
 		PMData->Shutdown.Flags.Camera = 1;
 		ProcessList[4]->Start();
 		Console::Write("Camera Module Restarted\n");
