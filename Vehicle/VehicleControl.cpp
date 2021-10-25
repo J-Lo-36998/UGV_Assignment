@@ -67,7 +67,7 @@ void VehicleControl::controls() {
 	int Vehicleflag = 0;
 	VehiclePtr->flag = !VehiclePtr->flag;//change vehicle flag to show its working/ actively controlling vehicle
 	Vehicleflag = int(VehiclePtr->flag);//convert bool to int in order to print as 1 and 0
-	String^ vehicleControl = gcnew String("#	" + Math::Round((VehiclePtr->Steering),2) + "	" + Math::Round((VehiclePtr->Speed),2) + "	 " + Vehicleflag + "	#");
+	String^ vehicleControl = gcnew String("#" + Math::Round((VehiclePtr->Steering),2) + " " + Math::Round((VehiclePtr->Speed),2) + " " + Vehicleflag + "#");
 	Console::WriteLine(vehicleControl); //write the control string to vehicle console
 	SendData = System::Text::Encoding::ASCII->GetBytes(vehicleControl);
 	Stream->Write(SendData, 0, SendData->Length);
