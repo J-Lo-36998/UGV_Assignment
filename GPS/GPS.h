@@ -39,7 +39,7 @@ protected:
 	String^ ResponseData;
 	SM_GPS* GpsPtr;
 	GPSstruct* GPSdata;
-	int Start;
+	int StartPoint;
 };
 
 

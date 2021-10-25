@@ -50,7 +50,7 @@ int GPS::getData()
 			dataHeader = ((dataHeader << 8) | Data);//each time shifts by 2 hex characters which is 8 bits to check for header again
 		} 
 		while (dataHeader != 0xaa44121c);//checks if data header is the same as the header of raw data
-		Start = i - 4; //go back to begining of header/first element (starting point of data array)
+		StartPoint = i - 4; //go back to begining of header/first element (starting point of data array)
 	}
 	return 1;
 }
@@ -65,7 +65,7 @@ int GPS::sendDataToSharedMemory()
 	unsigned char* BPtr = nullptr;
 	BPtr = (unsigned char*)GPSdata;//Pointer to beginning of data location
 	//Iterate throught data and add to pointer to GPS data struct
-	for (int i = Start; i < Start + sizeof(GPSstruct); i++) {
+	for (int i = StartPoint; i < StartPoint + sizeof(GPSstruct); i++) {
 		*(BPtr++) = ReadData[i];
 	}
 	//checks if the checksum is equal to the CRC32 value, if it is then data is good
