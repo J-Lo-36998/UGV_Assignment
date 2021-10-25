@@ -37,7 +37,6 @@ protected:
 	//unsigned char* BPtr;
 	ProcessManagement* PMPtr;
 	String^ ResponseData;
-	TcpClient^ Client;
 	SM_GPS* GpsPtr;
 	GPSstruct* GPSdata;
 	int Start;
