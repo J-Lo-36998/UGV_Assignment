@@ -113,6 +113,7 @@ GPS::~GPS()
 	// Free memmory
 	delete PMData;
 	delete SensorData;
+	delete GPSdata;
 }
 
 unsigned long CRC32Value(int i)
