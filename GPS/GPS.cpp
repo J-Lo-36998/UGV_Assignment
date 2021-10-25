@@ -110,7 +110,9 @@ int GPS::ShutDown(){
 }
 GPS::~GPS()
 {
-	// YOUR CODE HERE
+	// Free memmory
+	delete PMData;
+	delete SensorData;
 }
 
 unsigned long CRC32Value(int i)
