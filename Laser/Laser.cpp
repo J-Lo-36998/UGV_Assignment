@@ -146,7 +146,9 @@ int Laser::disconnect() {
 }
 Laser::~Laser()
 {
-	// YOUR CODE HERE
+	// Free memmory
+	delete PMData;
+	delete SendData;
 }
 
 unsigned long CRC32Value(int i)
