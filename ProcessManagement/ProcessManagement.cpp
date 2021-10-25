@@ -218,8 +218,8 @@ int main(){
 			break;
 		}
 	}
-	Console::WriteLine("Please Press a Key to Exit");
-	Console::ReadKey();
+	/*Console::WriteLine("Please Press a Key to Exit");
+	Console::ReadKey();*/
 	PMData->Shutdown.Status = 0xFF;//make sure everything is off
 	return 0;
 }
