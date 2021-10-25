@@ -179,7 +179,7 @@ int main(){
 	VehicleData = (SM_VehicleControl*)VehicleObj.pData;
 
 	//start all 5 modules
-	array<String^>^ ModuleList = gcnew array<String^>{"Laser1", "Display1", "Vehicle", "GPS", "Camera"}; //names of modules to be started
+	array<String^>^ ModuleList = gcnew array<String^>{"Laser1", "Display2", "Vehicle", "GPS", "Camera"}; //names of modules to be started
 	array<Process^>^ ProcessList = gcnew array<Process^>(ModuleList->Length);
 	for (int i = 0; i < ModuleList->Length; i++) {//iterate through Process list and start each process
 		if (Process::GetProcessesByName(ModuleList[i])->Length == 0) {
